@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+title: "Nepali Speech->Phones Conversion Kit (NSPC-Kit)"
+message: "If you use this software, please cite the Standard and sources below."
+type: software
+authors:
+  - family-names: Ghimire
+    given-names: Sandip
+repository-code: "https://github.com/<your-org>/nepali-speech-phones-kit"
+license: MIT
+version: 0.1.0
+references:
+  - type: software
+    title: "Nepali Computational Pronunciation Standard v1.0"
+    authors:
+      - family-names: Ghimire
+        given-names: Sandip
+    year: 2026
+    note: "Authoritative linguistic specification this kit implements."
+  - type: article
+    title: "A Descriptive Grammar of Nepali and an Analyzed Corpus"
+    authors:
+      - family-names: Acharya
+        given-names: Shivraj
+    year: 1991
+  - type: book
+    title: "Nepali Varṇavinyās"
+    authors:
+      - family-names: Nepal
+        given-names: Devī
+    year: 2011
+    publisher: "Nepal Academy"
+  - type: book
+    title: "Praśāsanic Vyākaraṇ Varṇavinyās"
+    authors:
+      - family-names: "Nepal Academy"
+    note: "pp. 327-349; normative over Varṇavinyās on conflict"
+  - type: article
+    title: "Nepali"
+    authors:
+      - family-names: Clements
+        given-names: G. N.
+      - family-names: Khatiwada
+        given-names: R.
+    year: 2009
+    journal: "Journal of the International Phonetic Association"
+  - type: software
+    title: "real_nepali / nepa-newa-text-frontend (prior art)"
+    authors:
+      - family-names: "Ampixa"
+    note: "Prior G2P attempt; 48k lexicon used only as a cross-check source, re-audited against U5."

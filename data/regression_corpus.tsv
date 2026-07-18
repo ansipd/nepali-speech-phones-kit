@@ -1,0 +1,13 @@
+word	branch	u5_retain	gt_retain	source
+विकास	C1	True	True	unit
+घर	C6	False	False	unit
+हुन्	C0	False	False	unit
+छन्	C0	False	False	unit
+हुन्छ	C2	True	True	unit
+मञ्च	C1-Lneg	False	False	unit
+यस	C6	False	False	unit
+पार्क	C5	False	False	unit
+देश	C4	True	True	heldout_repr
+नेपाल	C6	False	False	heldout_repr
+अन्त	C1	True	True	heldout_repr
+सरकार	C4	True	True	heldout_repr

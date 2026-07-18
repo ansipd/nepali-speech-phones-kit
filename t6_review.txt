@@ -1,0 +1,88 @@
+=== NSPC-Kit listening-review set (T6) ===
+Total sentences: 10
+
+Columns:  DEV (Devanagari) | READ (simple letters) | IPA
+
+--- sentence 1 ---
+DEV: नमस्ते नेपाल।
+  नमस्ते       | namaste        | n ə m ə s t e  [rule]
+  नेपाल        | nepal          | n e p ə l  [rule]
+
+--- sentence 2 ---
+DEV: म बिहान उठेर हिँड्न जान्छु।
+  म            | ma             | m ə  [lexicon]
+  बिहान        | bihan          | b i ɦ ə n  [rule]
+  उठेर         | uthera         | u ʈʰ e r ə  [rule]
+  हिँड्न       | hindnu         | ɦ ĩ ɖ ɳ u  [lexicon]
+  जान्छु       | janchu         | dʒ ə n tʃʰ u  [rule]
+
+--- sentence 3 ---
+DEV: ऊ खाना खाएर सुत्छ।
+  ऊ            | u              | uː  [rule]
+  खाना         | khana          | kʰ ə n ə  [rule]
+  खाएर         | khaera         | kʰ ə e r ə  [rule]
+  सुत्छ        | sutcha         | s u t tʃʰ ə  [lexicon]
+
+--- sentence 4 ---
+DEV: हामी स्कुल जान्छौं।
+  हामी         | hami           | ɦ ə m iː  [rule]
+  स्कुल        | skul           | s k u l  [rule]
+  जान्छौं      | janchon        | dʒ ə n tʃʰ õ  [rule]
+
+--- sentence 5 ---
+DEV: उसले किताब पढेर दियो।
+  उसले         | usle           | u s l e  [lexicon]
+  किताब        | kitab          | k i t ə b  [rule]
+  पढेर         | padhera        | p ə ɖʱ e r ə  [rule]
+  दियो         | diyo           | d i j o  [rule]
+
+--- sentence 6 ---
+DEV: राखेर हेरेर फर्केर गएर हानेर ठोकेर जोतेर काम गर्छ।
+  राखेर        | rakhera        | r ə kʰ e r ə  [rule]
+  हेरेर        | herera         | ɦ e r e r ə  [rule]
+  फर्केर       | pharkera       | pʰ ə r k e r ə  [rule]
+  गएर          | gaera          | ɡ ə e r ə  [rule]
+  हानेर        | hanera         | ɦ ə n e r ə  [rule]
+  ठोकेर        | thokera        | ʈʰ o k e r ə  [rule]
+  जोतेर        | jotera         | dʒ o t e r ə  [rule]
+  काम          | kam            | k ə m  [rule]
+  गर्छ         | garcha         | ɡ ə r tʃʰ ə  [rule]
+
+--- sentence 7 ---
+DEV: भन्छ सुत्छ हुन्छ भएन हुन्छन् हुन् छन्।
+  भन्छ         | bhancha        | bʱ ə n tʃʰ ə  [lexicon]
+  सुत्छ        | sutcha         | s u t tʃʰ ə  [lexicon]
+  हुन्छ        | huncha         | ɦ u n tʃʰ ə  [lexicon]
+  भएन          | bhaena         | bʱ ə e n ə  [lexicon]
+  हुन्छन्      | hunchan        | ɦ u n tʃʰ ə n  [rule]
+  हुन्         | hun            | ɦ u n  [rule]
+  छन्          | chan           | tʃʰ ə n  [rule]
+
+--- sentence 8 ---
+DEV: विकास दुख सुख सरकार घर नेपाल मञ्च अन्त।
+  विकास        | bikasa         | ʋ i k ə s ə  [lexicon]
+  दुख          | dukha          | ɖ u kʰ ə  [lexicon]
+  सुख          | sukha          | s u kʰ ə  [lexicon]
+  सरकार        | sarkar         | s ə r k ə r  [lexicon]
+  घर           | ghar           | ɡʱ ə r  [rule]
+  नेपाल        | nepal          | n e p ə l  [rule]
+  मञ्च         | manch          | m ə ɳ tʃʰ  [lexicon]
+  अन्त         | anta           | ə n t ə  [rule]
+
+--- sentence 9 ---
+DEV: करणबाट देशतिर तिरसँग भाषादार हिजोसँग।
+  करणबाट       | karanabata     | k ə r ə ɳ ə b ə ʈ ə  [lexicon]
+  देशतिर       | deshtira       | d e ʃ t i r ə  [lexicon]
+  तिरसँग       | tirasanga      | t i r ə s ã ɡ ə  [lexicon]
+  भाषादार      | bhashadar      | bʱ ə ʂ ə d ə r  [lexicon]
+  हिजोसँग      | hijosanga      | ɦ i dʒ o s ã ɡ ə  [lexicon]
+
+--- sentence 10 ---
+DEV: चिनियाँ छाता स्कुल अनलाइन पार्क यस को।
+  चिनियाँ      | chiniya        | tʃ i ɳ i j ə  [lexicon]
+  छाता         | chata          | tʃʰ ə t ə  [rule]
+  स्कुल        | skul           | s k u l  [rule]
+  अनलाइन       | anlin          | ə n l i n  [lexicon]
+  पार्क        | park           | p ə r k  [lexicon]
+  यस           | yus            | j u s  [lexicon]
+  को           | ko             | k o  [rule]

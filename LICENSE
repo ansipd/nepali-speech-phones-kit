@@ -1,0 +1,12 @@
+The Nepali Computational Pronunciation Standard v1.0 (SPECIFICATION.md and
+its companion files) is released for reuse, citation, and implementation under
+a permissive terms:
+
+  - You may use, copy, modify, and redistribute the specification and reference
+    implementation for any purpose, including commercial, provided you retain
+    this notice and do not claim the Nepal Academy primary sources as your own.
+
+No warranty is given. The SPECIFICATION is the authoritative artifact; any
+implementation conforming to it is a separate work.
+
+Suggested attribution: see CITATION.

@@ -1,0 +1,23 @@
+[project]
+name = "nspc"
+version = "0.1.0"
+description = "Universal Nepali grapheme-to-phoneme (G2P) frontend: text to canonical phonemes for TTS training."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Sandip Ghimire" }]
+keywords = ["nepali", "g2p", "tts", "text-to-speech", "phonemizer", "devanagari", "speech"]
+dependencies = [
+    "unicodedata2; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+trainers = ["openpyxl", "indicxlit"]   # lexicon build + Latin code-switch
+dev = ["pytest"]
+
+[project.scripts]
+nspc = "nspc.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
