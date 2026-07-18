@@ -15,11 +15,11 @@ adapter — Piper, Matcha-TTS, VITS, Coqui, ONNX, or plain IPA.
 > lost gemination, no principled schwa deletion).
 
 ## Why this exists
-Existing Nepali G2P (eSpeak `ne`; Ampixa `real_nepali`) has known errors:
-alveolar instead of palatal च/छ, dropped gemination, heuristic schwa, and
-~5% OOV words handled by blind letter-fallback. NSPC-Kit replaces them with a
-deterministic, exception-free rule system (U5: C0–C6 + L_neg + length) plus a
-lexicon that falls back to **rules, not letters**, for unknown words.
+Existing Nepali G2P toolkits have known errors: alveolar instead of palatal
+च/छ, dropped gemination, heuristic schwa, and ~5% OOV words handled by blind
+letter-fallback. NSPC-Kit replaces them with a deterministic, exception-free
+rule system (U5: C0–C6 + L_neg + length) plus a lexicon that falls back to
+**rules, not letters**, for unknown words.
 
 ## Install
 ```bash
