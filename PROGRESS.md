@@ -33,7 +33,8 @@ nspc/core/
 tests/
   test_standard_regression.py   unit traces + 7282-row corpus regression (GREEN)
   test_no_trailing_schwa.py     Kala 'r ax' defect guard (GREEN)
-  test_native_audit.py          29 curated native-validated tokens (GREEN)
+   test_native_audit.py          29 curated native-validated tokens (GREEN)
+   test_nasal_anusvara_chandrabindu.py  ँ vs ं split regression (R3.4, GREEN)
 docs/
   SPECIFICATION.md   authoritative standard v1.0 (+ T6 addendum appended)
   INVENTORY.md        canonical phone inventory
@@ -306,5 +307,15 @@ the authority over unreliable corpus GT.
 - Deleted the curated दुख/सुख overrides (now rule-derived). Lexicon now 9
   genuine irregularities. test_native_audit updated: दुख->Dukha (द = dental D),
   सुख->sukha, branch C5b.
-- Verification: All 4 suites GREEN. Not yet committed (pending user review).
+- Verification: All 4 suites GREEN.
+
+### 5e. NASAL SPLIT REGRESSION TEST (R3.4) (2026-07-19)
+- Added `tests/test_nasal_anusvara_chandrabindu.py` (standalone, 9 cases) to
+  LOCK IN the ँ (chandrabindu = vowel nasalization only) vs ं (anusvara =
+  homorganic nasal consonant by following consonant) split. Confirms the OLD
+  bug (treating both identically by nasalizing the vowel) cannot regress:
+  संगीत->sanggi:T, संभव->sambhaw, संस्कृति->sanskrTi, संज्ञ->sanygy, हंस->hans,
+  कंठ->kaNtha, पंख->pangkha, सँग->saga, सँगै->sage. All GREEN.
+- Confirmed by native review: संस्कृति phonetically "sanskriti" (nasal consonant
+  before स), so the nasal-consonant realization is correct, not vowel nasalization.
 
