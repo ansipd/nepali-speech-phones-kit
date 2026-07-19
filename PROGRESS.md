@@ -342,3 +342,39 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
 - Net code change: मंच->मञ्च map + R7 host_drops fix. Lexicon now 8 genuine
   irregularities. All 5 suites GREEN. Not yet committed (pending push).
 
+### 5g. (IN PROGRESS - PAUSED) Ohala internal schwa-deletion rule
+**Goal**: make सरकार/तरबार/सलवार/तलवार rule-based (currently सरकार curated,
+तरबार/सलवार wrong via rule as Taraba:r/salawa:r).
+
+**Research (web search, this session)**: Ohala's Indo-Aryan schwa-deletion rule
+`ə -> ∅ / V C1 C2 V` (a consonant's inherent /a/ deletes when followed by
+another consonant that itself begins a new syllable). Confirmed this protects
+simplex words: कमल->kamal, करण->karan, घर->ghar (C2 is word-final, no vowel
+after -> keep). This is the correct, citable rule.
+
+**Implementation (INCOMPLETE, stashed)**: added `_ohala_internal_schwa(cps,i)`
+helper + wired into the medial block of `rules.segment`. But TEST showed target
+words STILL WRONG: सरकार->saraka:r (स's अ NOT dropped), तरबार->Taraba:r,
+सलवार->salawa:r, तलवार->Talawa:r. Protective cases CORRECT: कमल->kamal,
+करण->karan, घर->ghar, पुस्तक->pusTak. So the helper/condition has a bug — it is
+NOT firing for these words. Likely cause: the `_ohala_internal_schwa` condition
+or its placement in the medial block isn't dropping C1's अ as expected (possibly
+the C2-followed-by-vowel check or the `i != join_idx`/final guards interfere).
+**NOT committed.** Work saved via `git stash` (message: "WIP: Ohala internal
+schwa-deletion rule (INCOMPLETE ...)"). Resume with `git stash pop`.
+
+**To do on resume**:
+1. `git stash pop` to restore rules.py changes.
+2. Debug why `_ohala_internal_schwa` returns False for सरकार (print trace /
+unit-test the helper directly on ['स','र','क','ा','र']).
+3. Fix the condition; re-verify targets -> sarkar/tarbar/salwar/talwar and
+   protectors -> kamal/karan/ghar unchanged.
+4. Run all 5 suites; likely delete सरकार curated override if rule matches.
+5. Add a regression test (test_schwa_ohala.py) with the 4 target words + कमल/करण.
+6. Commit + push; update AUDIT doc (सरकार row) and this section.
+
+**Open question for native review**: does the Ohala rule over-delete anywhere in
+the 942-word corpus (e.g. words where C1 C2 V should KEEP C1's अ)? Must scan
+corpus after fix and confirm with native ear.
+
+
