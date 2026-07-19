@@ -97,6 +97,27 @@ ANUSVARA = "\u0902"      # ं
 CHANDRABINDU = "\u0901"  # ँ
 VISARGA = "\u0903"      # ः
 
+# Anusvara (ं) -> nasal consonant by place of the FOLLOWING consonant
+# (Sanskrit anunasika sandhi; phonetically realized in Nepali). Maps a
+# canonical consonant token to the nasal it triggers.
+_ANUSVARA_NASAL = {
+    # velar
+    "k": "ng", "kh": "ng", "g": "ng", "gh": "ng", "ng": "ng",
+    # palatal
+    "c": "ny", "ch": "ny", "j": "ny", "jh": "ny", "ny": "ny",
+    # retroflex
+    "t": "N", "th": "N", "d": "N", "dh": "N", "n": "N",
+    # dental
+    "T": "n", "Th": "n", "D": "n", "Dh": "n", "N": "n",
+    # labial
+    "p": "m", "ph": "m", "b": "m", "bh": "m", "m": "m",
+    # semivowels / approximants / sibilants / h
+    "y": "n", "r": "n", "l": "n", "w": "n",
+    "s": "n", "sh": "n", "S": "n", "h": "n",
+    # multi-char conjunct tokens: assimilate by their leading place
+    "ks": "ng", "jn": "ny", "tr": "N",
+}
+
 # Postpositions / derivational suffixes that trigger R7 join-schwa deletion
 # when attached to a host stem (verified native: the JOIN schwa drops, the
 # suffix keeps its own final अ). Longest-first for greedy matching. Both
@@ -130,6 +151,27 @@ def _medial_cluster(c1, c2):
 
 def _is_consonant_base(cp):
     return cp in CONSONANT_BASE
+
+
+def _next_consonant_token(cps, i):
+    """Return the canonical consonant token immediately following position i,
+    skipping any virama (conjunct join) and matras, stopping at the next base
+    consonant. Used by the anusvara assimilation rule. Returns None if none."""
+    j = i + 1
+    n = len(cps)
+    while j < n:
+        cp = cps[j]
+        if cp == VI_RAMA:
+            j += 1
+            continue
+        if _is_matra(cp):
+            j += 1
+            continue
+        if _is_consonant_base(cp):
+            return CONSONANT_BASE[cp]
+        # skip other marks (chandrabindu/anusvara/visarga) and move on
+        j += 1
+    return None
 
 
 def _is_matra(cp):
@@ -290,12 +332,30 @@ def segment(word, tags=None):
             continue
 
         # 5) nasalization
-        if cp == ANUSVARA or cp == CHANDRABINDU:
-            # nasalize the preceding vowel if any
+        if cp == CHANDRABINDU:
+            # Chandrabindu (ँ): PURE vowel nasalization. No consonant is
+            # realized; the preceding vowel is marked nasal (~). e.g. सँ -> sa~,
+            # सँगै -> sa~ + gai = "sagai" (न silent). Rule-based, distinct from
+            # anusvara below.
             if out and out[-1] in _inv.VOWELS and not out[-1].endswith("~"):
                 out[-1] = out[-1] + "~"
             else:
-                out.append("N")  # default nasal (rare)
+                out.append("a~")  # rare: standalone chandrabindu
+            i += 1
+            continue
+        if cp == ANUSVARA:
+            # Anusvara (ं): realized as a NASAL CONSONANT whose place matches the
+            # FOLLOWING consonant (Sanskrit anunasika sandhi, phonetic in Nepali).
+            #   velar  (कखगघङ)        -> ng   (संगीत = sangit)
+            #   palatal(चछजझञ)        -> ny   (संज्ञ = sanj~nya)
+            #   retroflex(टठडढण)       -> N    (संढ = saNdh..)
+            #   dental (तथदधन)         -> n    (संतति = santati)
+            #   labial (पफबभम)         -> m    (संभव = sambhav)
+            #   semi/appoint(yrlwशषसह)-> n    (संस्कृति = sanskriti)
+            # If no following consonant, default to 'n' (rare, word-final ं).
+            nxt_cons = _next_consonant_token(cps, i)
+            nasal = _ANUSVARA_NASAL.get(nxt_cons, "n")
+            out.append(nasal)
             i += 1
             continue
 

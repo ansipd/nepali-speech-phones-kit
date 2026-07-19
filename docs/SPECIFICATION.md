@@ -123,6 +123,24 @@ R3.3 [Medial /a/ before nasalization]
   Action  : PRONOUNCE /a/.
   Depends : R1.4, R2.2.
 
+R3.4 [Nasal marks — ँ vs ं are DISTINCT rules]
+  Purpose : Correct realization of the two nasal diacritics. They are NOT the
+            same; native ear confirms different outputs.
+  (a) CHANDRABINDU (ँ, U+0901): PURE vowel nasalization. NO consonant is
+      realized; the preceding vowel is marked nasal (~). The latent न is
+      SILENT.  e.g. सँगै -> sa~ + gai = "sagai"; सँग -> "sag"; आँखा -> a~kha.
+  (b) ANUSVARA (ं, U+0902): realized as a NASAL CONSONANT whose place matches
+      the FOLLOWING consonant (Sanskrit anunasika sandhi, phonetically active
+      in Nepali):
+        velar   (क ख ग घ ङ)      -> ng   e.g. संगीत -> sangit
+        palatal (च छ ज झ ञ)      -> ny   e.g. संज्ञ -> sangya
+        retroflex(ट ठ ड ढ ण)       -> N
+        dental  (त थ द ध न)        -> n    e.g. संस्कृति -> sanskriti
+        labial  (प फ ब भ म)        -> m    e.g. संभव -> sambhaw
+        semi/sibilant/h (य र ल व श ष स ह) -> n
+      If no following consonant (word-final ं, rare), default to n.
+  Depends : R1.4; reference impl helper _next_consonant_token + _ANUSVARA_NASAL.
+
 R3.5 [Medial /a/ before live conjunct member]
   Purpose : Medial inherent /a/ rule (in a conjunct).
   Inputs  : Live consonant that is a non-final member of a conjunct.

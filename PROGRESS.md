@@ -152,6 +152,30 @@ pal, sal, chamal, kun, tar, sar, park, school, kitab, desh.
   correct. All 4 suites GREEN (test_native_audit 29, test_no_trailing_schwa,
   test_standard_regression, test_matra_inventory_consistency).
 
+## 5c. FIX LOG (2026-07-19) — ँ vs ं nasal rules split
+
+- **User correction (native ear)**: ँ (chandrabindu) and ं (anusvara) are
+  DIFFERENT and must be handled by separate rules.
+  - ँ (chandrabindu) = PURE vowel nasalization, न silent. सँगै → **sagai**
+    (सँ = sa~ nasal-colored, गै = gai). Confirmed by user.
+  - ं (anusvara) = realized as a NASAL CONSONANT matching the place of the
+    FOLLOWING consonant (Sanskrit anunasika sandhi). Confirmed by user:
+    संगीत → **sangit** (ं→ng before ग), संस्कृति → **sanskriti** (ं→n before स).
+- **Old behaviour (wrong)**: both ँ and ं just added `~` to the vowel
+  (संगीत → "sa~git", losing the ng/n consonant). Now fixed.
+- **New rule (rules.py, step 5)**:
+  - CHANDRABINDU → nasalize preceding vowel (`a~` etc.); no consonant.
+  - ANUSVARA → insert nasal consonant by place of next consonant:
+    velar(कखगघङ)→`ng`, palatal(चछजझञ)→`ny`, retroflex(टठडढण)→`N`,
+    dental(तथदधन)→`n`, labial(पफबभम)→`m`, semi/sibilant/h→`n`.
+    Helper `_next_consonant_token` skips virama/matra; `_ANUSVARA_NASAL` map.
+- **Verified**: सँग→sag, संग→sang, परिक्षासँग→parikshasag, गञ्जसँग→ganjsag
+  (ं→ny before ज), संभव→sambhaw (ं→m before भ), आँखा→a~kha (आँ=a:~).
+- **Corpus scan**: 94/672 unique words carry a nasal mark; 81 emit ng/ny/~.
+  No broken patterns. All 4 suites remain GREEN.
+- **Files changed**: `nspc/core/rules.py` (split nasal handlers, `_ANUSVARA_NASAL`,
+  `_next_consonant_token` helper).
+
 ## 6. KNOWN LIMITATIONS
 
 - Final schwa is partially idiosyncratic in Nepali; handled via C6 default +
