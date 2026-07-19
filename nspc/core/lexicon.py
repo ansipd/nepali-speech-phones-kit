@@ -121,10 +121,6 @@ class Lexicon:
             # These override OOV-rule errors where Nepali deletes/keeps a
             # schwa that the orthography-only rule gets wrong. Each carries
             # its validated canonical tokens directly (authoritative).
-            "दुख":      {"tokens": ["d", "u", "kh", "a"], "branch": "C6",
-                        "retain": True, "note": "dukha (final अ kept)"},
-            "सुख":      {"tokens": ["s", "u", "kh", "a"], "branch": "C6",
-                        "retain": True, "note": "sukha (final अ kept)"},
             "यस":       {"tokens": ["y", "u", "s"], "branch": "C6",
                         "retain": True, "note": "yus (अ→u sound change)"},
             "उसले":     {"tokens": ["u", "s", "l", "e"], "branch": "C6",

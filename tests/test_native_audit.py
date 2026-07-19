@@ -55,8 +55,8 @@ AUDIT = [
     ("छाता", ["ch", "a:", "T", "a:"], "C6", "palatal छ=tʃʰ; आ matra = long aː"),
     # --- final-अ kept on short words (native validated) ---
     ("म", ["m", "a"], "C6", "pronoun ma"),
-    ("दुख", ["d", "u", "kh", "a"], "C6", "dukha"),
-    ("सुख", ["s", "u", "kh", "a"], "C6", "sukha"),
+    ("दुख", ["D", "u", "kh", "a"], "C5b", "dukha (aspirated-final ख keeps अ)"),
+    ("सुख", ["s", "u", "kh", "a"], "C5b", "sukha (aspirated-final ख keeps अ)"),
     ("यस", ["y", "u", "s"], "C6", "yus (अ→u)"),
     ("उसले", ["u", "s", "l", "e"], "C6", "usle (medial schwa deleted)"),
     ("अनलाइन", ["a", "N", "l", "i", "N"], "C6", "unline (medial schwas deleted)"),

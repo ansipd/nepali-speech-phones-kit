@@ -39,6 +39,31 @@ TATSAMA_DELETE = {"देश"}
 RETAIN_FINAL = {"यस", "पुस्तकालय", "अर्थशास्त्र", "मित्रता", "साहित्य"}
 VI_RAMA = "\u094d"  # U+094D halanta
 
+# Aspirated stops/affricates (Devanagari consonant bases). A native word whose
+# FINAL consonant is an aspirated stop/affricate KEEPS its inherent /a/ (e.g.
+# दुख -> dukha, सुख -> sukha): the breathy release is realized with a following
+# vowel, so the final /a/ is not elided. Phonotactic class rule (not a word
+# list) — subsumes the दुख/सुख case confirmed by native review. Extend the set
+# only with native confirmation for other aspirated finals.
+_ASPIRATED = {"\u0916",  # ख
+              "\u0918",  # घ
+              "\u091a",  # छ
+              "\u091c",  # झ
+              "\u0920",  # ठ
+              "\u0922",  # ढ
+              "\u0926",  # थ
+              "\u0927",  # ध
+              "\u092b",  # फ
+              "\u092c"}  # भ
+
+
+def _final_consonant_base(orth):
+    """Return the LAST Devanagari consonant base in orth (NFC), or '' if none."""
+    for c in reversed(orth):
+        if "\u0915" <= c <= "\u0939":
+            return c
+    return ""
+
 # ---------------------------------------------------------------------------
 # R1.3 NFC + R1.4 dead/live detection (minimal; full conjunct expansion in spec)
 # ---------------------------------------------------------------------------
@@ -112,6 +137,13 @@ def u5(orth, tags):
     if tags.get("foreign"):
         retain = bool(tags.get("donor_schwa"))
         return ("C5", retain, "foreign loan -> DONOR pronunciation")
+    # C5b — aspirated-final: a native word whose FINAL consonant is an aspirated
+    # stop/affricate (ख/घ/छ/झ/ठ/ढ/थ/ध/फ/भ) KEEPS its inherent /a/ (e.g. दुख ->
+    # dukha, सुख -> sukha). The breathy release is realized with a following
+    # vowel, so the final /a/ is not elided. Phonotactic class rule (not a word
+    # list); confirmed by native review on दुख/सुख.
+    if _final_consonant_base(orth) in _ASPIRATED:
+        return ("C5b", True, "final aspirated stop -> RETAIN inherent /a/")
     # C6 — DEFAULT native noun/adj/assimilated word ending in a LIVE consonant
     # (no virama, no conjunct): the inherent /a/ is DELETED (verified native:
     # nepal, ghar, pariwar, buddhiman, udyog, nirman, arthik, samajik, gayak,

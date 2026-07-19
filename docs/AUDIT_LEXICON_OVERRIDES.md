@@ -23,13 +23,11 @@
 All now resolve via the rule engine (src=rule). Zero behaviour regression
 (verified: भन्छ→bhaNcha, स्कन्ध→skaNDha, पुस्तकालय→pusTaka:laya, etc.).
 
-### KEEP — genuinely irregular (11 entries remain curated)
+### KEEP — genuinely irregular (9 entries remain curated)
 | Word | Tokens | Why curated |
 |------|--------|-------------|
 | पार्क | pa:rk | foreign loan C5 (foreign detection TABBED) |
 | विकास | wika:sa | tatsama C4 retain (kept for clarity) |
-| दुख | dukha | final अ kept (RETAIN_FINAL candidate) |
-| सुख | sukha | final अ kept (RETAIN_FINAL candidate) |
 | यस | yus | अ→u sound change (irregular) |
 | उसले | usle | medial schwa after स deleted |
 | सरकार | sarkar | medial schwa after स deleted |
@@ -38,13 +36,17 @@ All now resolve via the rule engine (src=rule). Zero behaviour regression
 | हिँड्न | hidnu | infinitive न् retained |
 | काठमान्डु | kathamandu | proper noun, native spelling |
 
+> `दुख`/`सुख` overrides DELETED (2026-07-19): now covered by new U5 **C5b**
+> aspirated-final rule — any native word ending in an aspirated stop/affricate
+> (ख/घ/छ/झ/ठ/ढ/थ/ध/फ/भ) keeps its final inherent /a/. Phonotactic class rule,
+> not a word list. दुख->Dukha, सुख->sukha.
+
 > `म` override DELETED (2026-07-19): single live consonant now RETAINED via
 > new U5 C-HALO branch + `is_halo` in normalize.auto_tag. म→ma, त→Ta, क→ka,
 > स→sa, etc. all rule-derived.
 
 ## REMAINING RULE-BASED OPPORTUNITIES (future sessions)
-1. **दुख/सुख** → RETAIN_FINAL class.
-2. **मञ्च** → ञ→n assimilation rule.
-3. **उसले/सरकार/अनलाइन** → medial schwa-deletion-after-स/र pattern (R7-general).
-4. **पार्क** → foreign-loan detection (tabled).
+1. **मञ्च** → ञ→n assimilation rule.
+2. **उसले/सरकार/अनलाइन** → medial schwa-deletion-after-स/र pattern (R7-general).
+3. **पार्क** → foreign-loan detection (tabled).
 

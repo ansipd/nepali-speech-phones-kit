@@ -58,6 +58,9 @@ data/sample_sentences.txt  10 T6 sentences
 - C5: foreign -> DONOR pronunciation (पार्क/स्कुल/किताब -> DELETE)
 - C-HALO: a SINGLE live consonant (म/त/क/स...) -> RETAIN inherent /a/
   (ma/Ta/ka/sa). General rule, no exceptions; subsumes former म lexicon entry.
+- C5b: aspirated-final — native word ending in an aspirated stop/affricate
+  (ख/घ/छ/झ/ठ/ढ/थ/ध/फ/भ) -> RETAIN inherent /a/ (दुख->dukha, सुख->sukha).
+  Phonotactic class rule, subsumes former दुख/सुख lexicon entries.
 - C6: DEFAULT native live-final noun/adj -> **DELETE** (see §3D exceptions)
 
 ### R7 — compound / sandhi
@@ -293,5 +296,15 @@ the authority over unreliable corpus GT.
 - Deleted the curated `म -> ma` override (now rule-derived). Lexicon now 11
   genuine irregularities.
 - Verification: म/त/क/स/न/र/य/ह/व/ल/प all -> ...a via rule (src=rule).
-  All 4 suites GREEN. Not yet committed (pending user review).
+  All 4 suites GREEN.
+
+### 5d. ASPIRATED-FINAL RETAIN RULE (C5b) (2026-07-19) — all GREEN
+- New U5 branch `C5b`: native word whose FINAL consonant is an aspirated
+  stop/affricate (ख/घ/छ/झ/ठ/ढ/थ/ध/फ/भ) RETAINs inherent /a/ (breathy release
+  realized with a following vowel). Phonotactic class rule, NOT a word list.
+  Implemented via `_final_consonant_base(orth) in _ASPIRATED` in u5_reference.
+- Deleted the curated दुख/सुख overrides (now rule-derived). Lexicon now 9
+  genuine irregularities. test_native_audit updated: दुख->Dukha (द = dental D),
+  सुख->sukha, branch C5b.
+- Verification: All 4 suites GREEN. Not yet committed (pending user review).
 
