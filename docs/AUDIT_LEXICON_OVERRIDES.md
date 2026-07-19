@@ -23,7 +23,7 @@
 All now resolve via the rule engine (src=rule). Zero behaviour regression
 (verified: भन्छ→bhaNcha, स्कन्ध→skaNDha, पुस्तकालय→pusTaka:laya, etc.).
 
-### KEEP — genuinely irregular (9 entries remain curated)
+### KEEP — genuinely irregular (8 entries remain curated)
 Each is assessed for whether a general RULE could subsume it. The ones marked
 "rule-able (needs native confirmation on more words)" are phonotactic patterns
 but are NOT yet generalized because we lack corpus evidence and a broad rule
@@ -34,7 +34,7 @@ could wrongly change other words. They stay curated until native-reviewed.
 | पार्क | pa:rk | foreign loan C5 | TABBED: foreign detection (future) |
 | विकास | wika:sa | tatsama C4 retain | Already a rule (tatsama→RETAIN); curated only to supply the `tatsama` tag (auto_tag can't guess etymology). |
 | यस | yus | अ→u sound change | Genuine irregular — no rule. |
-| उसले | usle | medial schwa after स deleted | Pattern (schwa after स) — rule-able with native confirmation. |
+| उसले | usle | pronoun उस + ले join (host final schwa deleted) | NOW RULE-BASED: R7 join fix (host_drops_final_a = not host_retain). Covers उसले/जसले/कसले/उनले/त्यसले/कुनले. Override deleted. |
 | सरकार | sarkar | medial schwa after स deleted | Pattern (schwa after स) — rule-able with native confirmation. |
 | मञ्च | manch | ञ→n assimilation (speech variant) | Spelling-equivalent with मंच (anusvara); both map to मञ्च via normalize._SPELLING_VARIANTS. |
 | अनलाइन | aNliN | medial schwas deleted | Loan "online"; falls under schwa-after-स pattern. |
@@ -51,8 +51,8 @@ could wrongly change other words. They stay curated until native-reviewed.
 > स→sa, etc. all rule-derived.
 
 ## REMAINING RULE-BASED OPPORTUNITIES (future sessions, native confirmation needed)
-1. **उसले/सरकार/अनलाइन** → medial schwa-deletion-after-स pattern (R7-general).
-   Needs native review on a list of स-initial-medial words before generalizing.
+1. **सरकार/अनलाइन** → medial schwa deletion (compound/join). सरकार: सर+कार,
+   र's final अ drops (word-specific, no safe general rule). अनलाइन: loan.
 2. **पार्क** → foreign-loan detection (tabled).
 3. **विकास** → supply tatsama tag via a classifier (currently curated only for its
    etymology tag; the retain behaviour is already a rule).
@@ -62,9 +62,11 @@ could wrongly change other words. They stay curated until native-reviewed.
   kept, no change.
 - **मञ्च / मंच**: confirmed the SAME word (two spellings, anusvara vs conjunct).
   normalize._SPELLING_VARIANTS maps मंच -> मञ्च, so both yield "manch".
-- **उसले / सरकार**: confirmed medial schwa deletion, but the deletion site is
-  word-specific (उसले drops स's अ; सरकार drops र's अ). No safe single general
-  rule without a stem-splitter; both remain curated.
+- **उसले**: productive pronoun+ले pattern (उस/यस/जस/कस/उन/त्यस/कुन + ले). Now
+  RULE-BASED via R7 join fix: host_drops_final_a = (not host_retain). Covers
+  उसले->usle, जसले->jasle, कसले->kasle, उनले->uNle, etc. Override DELETED.
+- **सरकार**: सर+कार compound where र's final अ drops. Word-specific (no safe
+  general rule without a stem-splitter); remains curated.
 - **विकास, अनलाइन, हिँड्न, काठमान्डु, पार्क**: confirmed keep as curated.
 
 ## FINAL STATE (2026-07-19)
@@ -72,7 +74,7 @@ could wrongly change other words. They stay curated until native-reviewed.
   seed GT (L.process routes seed-only words to pure rule).
 - 2 rule generalizations added: C-HALO (single consonant keeps अ) and C5b
   (aspirated-final keeps अ) — together removed म, दुख, सुख.
-- Lexicon now holds **9 genuine irregularities** (table above). Every other
+- Lexicon now holds **8 genuine irregularities** (table above). Every other
   word in the 942-unique corpus resolves via the deterministic rule engine.
 - 5 test suites GREEN, including the ँ/ं nasal split regression (R3.4).
 

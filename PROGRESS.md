@@ -3,7 +3,7 @@
 **Project**: Deterministic, citable Nepali pronunciation Standard v1.0 + universal
 engine-agnostic G2P frontend for TTS training (no trained voice).
 **Location**: `C:\Users\Sandip Ghimire\nepali-speech-phones-kit\`
-**Status**: All 5 test suites GREEN as of 2026-07-19. Lexicon pruned to 9
+**Status**: All 5 test suites GREEN as of 2026-07-19. Lexicon pruned to 8
 genuine irregularities; rule engine now authoritative over unreliable seed GT;
 nasal ँ/ं split regression-locked (R3.4).
 
@@ -328,11 +328,17 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
   `normalize._SPELLING_VARIANTS` mapping मंच -> मञ्च, applied in both
   `rules.segment` and `lexicon.process` via `canonicalize()`. Both yield "manch"
   through the rule (no separate lexicon entry for मंच).
-- **उसले / सरकार**: medial schwa deletion confirmed, but the deletion site is
-  word-specific (उसले drops स's अ; सरकार drops र's अ). No safe single general
-  rule without a stem-splitter -> both KEPT curated.
+- **उसले**: productive pronoun+ले pattern (उस/यस/जस/कस/उन/त्यस/कुन + ले).
+  FIXED via R7 join rule: changed `host_drops_final_a` from
+  `(not retain) and (host_cons>1 or virama)` to simply `not _host_retain`, so
+  ANY host that deletes its final schwa standalone (including monosyllabic
+  उस/कस/जस/उन ending in स/न) drops it at the join. Now उसले->usle, जसले->jasle,
+  कसले->kasle, उनले->uNle, त्यसले->Tyasle, कुनले->kuNle — all rule-derived.
+  Verified ZERO corpus postposition words remain lexicon-sourced. Override
+  DELETED; lexicon now 8 entries.
+- **सरकार**: सर+कार compound, र's final अ drops. Word-specific (no safe general
+  rule without a stem-splitter) -> KEPT curated.
 - **विकास, अनलाइन, हिँड्न, काठमान्डु, पार्क**: confirmed KEPT curated.
-- Net code change: only the मंच->मञ्च spelling-variant map (rule-based). The 9
-  curated entries remain; this is the honest, auditable stopping point.
-- All 5 suites GREEN. Not yet committed (pending push).
+- Net code change: मंच->मञ्च map + R7 host_drops fix. Lexicon now 8 genuine
+  irregularities. All 5 suites GREEN. Not yet committed (pending push).
 

@@ -123,8 +123,6 @@ class Lexicon:
             # its validated canonical tokens directly (authoritative).
             "यस":       {"tokens": ["y", "u", "s"], "branch": "C6",
                         "retain": True, "note": "yus (अ→u sound change)"},
-            "उसले":     {"tokens": ["u", "s", "l", "e"], "branch": "C6",
-                        "retain": True, "note": "usle (medial schwa deleted)"},
             "सरकार":    {"tokens": ["s", "a", "r", "k", "a", "r"], "branch": "C6",
                         "retain": True, "note": "sarkar (schwa after स deleted)"},
             "मञ्च":      {"tokens": ["m", "a", "n", "ch"], "branch": "C1",

@@ -273,9 +273,14 @@ def segment(word, tags=None):
             from .u5_reference import u5 as _u5
             from .normalize import auto_tag as _auto_tag
             _, _host_retain, _ = _u5(host, _auto_tag(host))
-            _host_cons = sum(1 for c in host if _is_consonant_base(c))
-            host_drops_final_a = (not _host_retain) and \
-                (_host_cons > 1 or host.endswith(VI_RAMA))
+            # The host's final schwa is deleted at the join iff the host,
+            # pronounced STANDALONE, deletes its final schwa (U5 retain=False).
+            # This covers monosyllabic hosts like उस/कस/जस/उन (final स/न drops)
+            # as well as polysyllabic ones (नेपाल/साउन). Hosts that retain their
+            # final अ standalone (म=halo, घर=HALANTA_FINAL deletes so drops too,
+            # यस=RETAIN_FINAL keeps) behave accordingly: मलाई=malai (kept),
+            # यसले=yasale (kept, यस retains), घरलाई=gharlai (घर drops standalone).
+            host_drops_final_a = not _host_retain
             break
 
     while i < n:
