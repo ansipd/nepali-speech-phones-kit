@@ -3,8 +3,9 @@
 **Project**: Deterministic, citable Nepali pronunciation Standard v1.0 + universal
 engine-agnostic G2P frontend for TTS training (no trained voice).
 **Location**: `C:\Users\Sandip Ghimire\nepali-speech-phones-kit\`
-**Status**: All 4 test suites GREEN as of 2026-07-19. Lexicon pruned to 12
-genuine irregularities; rule engine now authoritative over unreliable seed GT.
+**Status**: All 5 test suites GREEN as of 2026-07-19. Lexicon pruned to 9
+genuine irregularities; rule engine now authoritative over unreliable seed GT;
+nasal ँ/ं split regression-locked (R3.4).
 
 ---
 
@@ -268,8 +269,9 @@ the authority over unreliable corpus GT.
   पुस्तकालय, अर्थशास्त्र, मित्रता, साहित्य, सफलता, प्रधानमन्त्री, चिनियाँ
   (7 matra-length — native confirmed ा is ALWAYS LONG, lexicon short forms were
   deviations).
-- **12 curated entries kept** as genuine irregularities: पार्क, विकास, म, दुख,
-  सुख, यस, उसले, सरकार, मञ्च, अनलाइन, हिँड्न, काठमान्डु.
+- **12 curated entries kept** as genuine irregularities (updated: म dropped via
+  C-HALO, दुख/सुख dropped via C5b — now **9**: पार्क, विकास, यस, उसले, सरकार,
+  मञ्च, अनलाइन, हिँड्न, काठमान्डु).
 - **Seed GT override fix**: `L.process` now routes seed-only entries to the PURE
   RULE (ignoring the seed's unreliable branch/retain from corpus GT). Only
   curated entries override the rule. This exposed + fixed 3 latent seed errors

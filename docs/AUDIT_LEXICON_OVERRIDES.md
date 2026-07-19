@@ -24,17 +24,22 @@ All now resolve via the rule engine (src=rule). Zero behaviour regression
 (verified: भन्छ→bhaNcha, स्कन्ध→skaNDha, पुस्तकालय→pusTaka:laya, etc.).
 
 ### KEEP — genuinely irregular (9 entries remain curated)
-| Word | Tokens | Why curated |
-|------|--------|-------------|
-| पार्क | pa:rk | foreign loan C5 (foreign detection TABBED) |
-| विकास | wika:sa | tatsama C4 retain (kept for clarity) |
-| यस | yus | अ→u sound change (irregular) |
-| उसले | usle | medial schwa after स deleted |
-| सरकार | sarkar | medial schwa after स deleted |
-| मञ्च | manch | ञ→n assimilation |
-| अनलाइन | aNliN | medial schwas deleted |
-| हिँड्न | hidnu | infinitive न् retained |
-| काठमान्डु | kathamandu | proper noun, native spelling |
+Each is assessed for whether a general RULE could subsume it. The ones marked
+"rule-able (needs native confirmation on more words)" are phonotactic patterns
+but are NOT yet generalized because we lack corpus evidence and a broad rule
+could wrongly change other words. They stay curated until native-reviewed.
+
+| Word | Tokens | Why curated | Rule-able? |
+|------|--------|-------------|------------|
+| पार्क | pa:rk | foreign loan C5 | TABBED: foreign detection (future) |
+| विकास | wika:sa | tatsama C4 retain | Already a rule (tatsama→RETAIN); curated only to supply the `tatsama` tag (auto_tag can't guess etymology). |
+| यस | yus | अ→u sound change | Genuine irregular — no rule. |
+| उसले | usle | medial schwa after स deleted | Pattern (schwa after स) — rule-able with native confirmation. |
+| सरकार | sarkar | medial schwa after स deleted | Pattern (schwa after स) — rule-able with native confirmation. |
+| मञ्च | manch | ञ→n assimilation (speech variant) | Pattern (ञ after म) — rule-able with native confirmation. |
+| अनलाइन | aNliN | medial schwas deleted | Loan "online"; falls under schwa-after-स pattern. |
+| हिँड्न | hidnu | infinitive न् retained | Genuine irregular (infinitive morphology). |
+| काठमान्डु | kathamandu | proper noun, native spelling | Genuine irregular (place name). |
 
 > `दुख`/`सुख` overrides DELETED (2026-07-19): now covered by new U5 **C5b**
 > aspirated-final rule — any native word ending in an aspirated stop/affricate
@@ -45,8 +50,20 @@ All now resolve via the rule engine (src=rule). Zero behaviour regression
 > new U5 C-HALO branch + `is_halo` in normalize.auto_tag. म→ma, त→Ta, क→ka,
 > स→sa, etc. all rule-derived.
 
-## REMAINING RULE-BASED OPPORTUNITIES (future sessions)
-1. **मञ्च** → ञ→n assimilation rule.
-2. **उसले/सरकार/अनलाइन** → medial schwa-deletion-after-स/र pattern (R7-general).
+## REMAINING RULE-BASED OPPORTUNITIES (future sessions, native confirmation needed)
+1. **उसले/सरकार/अनलाइन** → medial schwa-deletion-after-स pattern (R7-general).
+   Needs native review on a list of स-initial-medial words before generalizing.
+2. **मञ्च** → ञ→n assimilation rule (ञ after म → n).
 3. **पार्क** → foreign-loan detection (tabled).
+4. **विकास** → supply tatsama tag via a classifier (currently curated only for its
+   etymology tag; the retain behaviour is already a rule).
+
+## FINAL STATE (2026-07-19)
+- 15 redundant overrides deleted; rule engine is authoritative over unreliable
+  seed GT (L.process routes seed-only words to pure rule).
+- 2 rule generalizations added: C-HALO (single consonant keeps अ) and C5b
+  (aspirated-final keeps अ) — together removed म, दुख, सुख.
+- Lexicon now holds **9 genuine irregularities** (table above). Every other
+  word in the 942-unique corpus resolves via the deterministic rule engine.
+- 5 test suites GREEN, including the ँ/ं nasal split regression (R3.4).
 
