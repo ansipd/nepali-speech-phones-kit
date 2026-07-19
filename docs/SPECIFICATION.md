@@ -651,10 +651,11 @@ APPENDIX B — SOURCES (primary first)
 #    (ा/ी/ू/ौ) retains that vowel (handled by segmenter, not U5).
 #
 # D) EXCEPTION SETS (U5)
-#    HALANTA_FINAL (traditional halanta, DELETE): नेपाल, प्रधान
+#    HALANTA_FINAL (traditional halanta, DELETE): नेपाल, प्रधान, घर (ghar),
+#       कमल (kamal)  -- confirmed native: final अ dropped
 #    TATSAMA_DELETE (Sanskrit-derived but deletes): देश -> desh
-#    RETAIN_FINAL (native keep-/a/ exceptions): यस, कमल, पुस्तकालय,
-#       अर्थशास्त्र, मित्रता, साहित्य, घर (ghar keeps final अ)
+#    RETAIN_FINAL (native keep-/a/ exceptions): यस, पुस्तकालय,
+#       अर्थशास्त्र, मित्रता, साहित्य (sahitya keeps final अ)
 #    Foreign loans (C5, donor drops /a/): पार्क->park, स्कुल->school,
 #       किताब->kitab
 #

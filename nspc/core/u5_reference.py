@@ -23,7 +23,7 @@ L_NEG = {"मञ्च", "गञ्ज", "पन्त"}
 # Traditional HALANTA words: written without a virama yet pronounced WITHOUT
 # the final inherent /a/ (exception to the C6 RETAIN default). Confirmed by
 # native-speaker review. Add others ONLY with native confirmation.
-HALANTA_FINAL = {"नेपाल", "प्रधान"}
+HALANTA_FINAL = {"नेपाल", "प्रधान", "घर", "कमल"}
 
 # Tatsama words that, despite being Sanskrit-derived (which normally retains
 # surface /a/), are nativized with a deleted final /a/ (e.g. देश -> deś, not
@@ -36,7 +36,7 @@ TATSAMA_DELETE = {"देश"}
 # पुस्तकालय -> pustakalaya, अर्थशास्त्र -> arthashastra, मित्रता -> mitrata,
 # साहित्य -> sahitya. The lexicon curates the larger set; this u5-level set
 # covers the ones exercised by the UNIT trace / direct u5 call.
-RETAIN_FINAL = {"यस", "कमल", "पुस्तकालय", "अर्थशास्त्र", "मित्रता", "साहित्य", "घर"}
+RETAIN_FINAL = {"यस", "पुस्तकालय", "अर्थशास्त्र", "मित्रता", "साहित्य"}
 VI_RAMA = "\u094d"  # U+094D halanta
 
 # ---------------------------------------------------------------------------

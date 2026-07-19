@@ -176,6 +176,22 @@ pal, sal, chamal, kun, tar, sar, park, school, kitab, desh.
 - **Files changed**: `nspc/core/rules.py` (split nasal handlers, `_ANUSVARA_NASAL`,
   `_next_consonant_token` helper).
 
+## 5e. FIX LOG (2026-07-19) — घर/कमल reclassified to HALANTA_FINAL
+
+- **Native correction**: घर -> **ghar** and कमल -> **kamal** — both DROP their
+  final inherent /a/ (halanta-final), NOT retain. साहित्य -> **sahitya** KEEPS
+  its final अ (confirmed: final schwa NOT dropped). सा = "saa" (long आ), so
+  साहित्य = sahitya with long initial आ — the rule is correct, no change there.
+- **Bug found**: a prior fix (5b) had wrongly moved घर into RETAIN_FINAL, making
+  the pure rule emit "ghara". Same class of error for कमल ("kamala"). The
+  lexicon overrides were masking it.
+- **Fix**: moved घर and कमल from `RETAIN_FINAL` -> `HALANTA_FINAL` (U5 C6-H,
+  DELETE). Deleted their now-redundant lexicon curated overrides. Verified via
+  rule path: घर->ghar, कमल->kamal (src=rule). Updated
+  `test_standard_regression.py` expectation (घर C6-H/False) and SPECIFICATION
+  exception-set listing. साहित्य stays in RETAIN_FINAL (keeps final अ).
+- All 4 suites GREEN.
+
 ## 5d. FIX LOG (2026-07-19) — सँग final अ + foreign-name medial अ
 
 - **User correction (native ear)**:
