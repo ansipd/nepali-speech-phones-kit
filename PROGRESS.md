@@ -3,7 +3,8 @@
 **Project**: Deterministic, citable Nepali pronunciation Standard v1.0 + universal
 engine-agnostic G2P frontend for TTS training (no trained voice).
 **Location**: `C:\Users\Sandip Ghimire\nepali-speech-phones-kit\`
-**Status**: All 4 test suites GREEN as of 2026-07-19. Resting.
+**Status**: All 4 test suites GREEN as of 2026-07-19. Lexicon pruned to 12
+genuine irregularities; rule engine now authoritative over unreliable seed GT.
 
 ---
 
@@ -248,3 +249,38 @@ All four must stay GREEN. The regression .py files are standalone scripts
 py -c "from nspc.core import lexicon as L; print(L.process('प्रधानमन्त्री'))"
 # -> (['p','r','a','Dh','a','N','m','a','N','t','r','i:'], ..., 'pradhanmantri')
 ```
+
+## 5b. LEXICON PRUNING + SEED-GT OVERRIDE (2026-07-19) — all GREEN
+
+### Goal
+Shrink the curated lexicon to ONLY genuine irregularities; make the rule engine
+the authority over unreliable corpus GT.
+
+### Outcome
+- **15 redundant curated overrides deleted** (rule already produced correct
+  output): देश, भन्छ, सुत्छ, हुन्छ, भएन, देशतिर, स्कन्ध, स्कुल (8 BUCKET-1) +
+  पुस्तकालय, अर्थशास्त्र, मित्रता, साहित्य, सफलता, प्रधानमन्त्री, चिनियाँ
+  (7 matra-length — native confirmed ा is ALWAYS LONG, lexicon short forms were
+  deviations).
+- **12 curated entries kept** as genuine irregularities: पार्क, विकास, म, दुख,
+  सुख, यस, उसले, सरकार, मञ्च, अनलाइन, हिँड्न, काठमान्डु.
+- **Seed GT override fix**: `L.process` now routes seed-only entries to the PURE
+  RULE (ignoring the seed's unreliable branch/retain from corpus GT). Only
+  curated entries override the rule. This exposed + fixed 3 latent seed errors
+  that curated deletes had been masking: भन्छ→bhaNcha, सुत्छ→suTcha (C2b verb
+  retain), स्कन्ध→skaNDha (C1 conjunct retain). All three now resolve via rule.
+
+### Verification
+- All 4 suites GREEN. test_native_audit updated: चिनियाँ now expects rule output
+  `ciNiya:` (याँ = long nasal a:~, per native: या is LONG).
+- Spot checks: देश→Desh, स्कुल→skul, पुस्तकालय→pusTaka:laya, साहित्य→sa:hiTya,
+  भन्छ→bhaNcha, स्कन्ध→skaNDha (all src=rule).
+- Commit 8a730e1 pushed to GitHub (private: ansipd/nepali-speech-phones-kit).
+
+### Remaining rule-based opportunities (future)
+1. म → ma (single live consonant keeps अ).
+2. दुख/सुख → RETAIN_FINAL class.
+3. मञ्च → ञ→n assimilation rule.
+4. उसले/सरकार/अनलाइन → medial schwa-deletion-after-स/र pattern.
+5. पार्क → foreign-loan detection (tabled).
+
