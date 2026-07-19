@@ -3,7 +3,7 @@
 **Project**: Deterministic, citable Nepali pronunciation Standard v1.0 + universal
 engine-agnostic G2P frontend for TTS training (no trained voice).
 **Location**: `C:\Users\Sandip Ghimire\nepali-speech-phones-kit\`
-**Status**: All 3 test suites GREEN as of 2026-07-18. Resting.
+**Status**: All 4 test suites GREEN as of 2026-07-19. Resting.
 
 ---
 
@@ -121,6 +121,37 @@ pal, sal, chamal, kun, tar, sar, park, school, kitab, desh.
    (श/ष+stop). Monitor for other medial clusters.
 7. Document remaining known curated-exception words in SPEC appendix.
 
+## 5b. FIX LOG (2026-07-19) — R7 compound-join + घर reclassification
+
+- **Bug found via TTS listening (user authority)**: `साउनलाई` produced
+  `saunalai` (extra schwa) but correct is **`saunlai`**. User clarified the
+  issue is the JOIN: `साउन` = `saun` (न halanta-final, drops अ), then `लाई` =
+  `lai`; the segmenter was re-inserting ल's inherent अ at the join
+  (saun-**a**-lai).
+- **Root cause**: `लाई` was missing from `_POSTPOSITIONS`, so R7 never fired
+  for it. Also the join-schwa deletion was previously applied UNCONDITIONALLY,
+  which wrongly stripped the host's kept final अ (e.g. `मलाई`→`mlai` instead of
+  `malai`).
+- **Fix (principled R7)**: the host's final inherent /a/ is deleted at the join
+  ONLY when the host, pronounced standalone, drops its final schwa per U5 —
+  i.e. it is halanta-final (नेपाल→nepal, साउन→saun, करण→karan, प्रधान→pradhan).
+  If the host KEEPS its final अ (म→ma, घर→ghar, यस→yas, काठमान्डु→kathamandu,
+  हामी→hami), that अ is retained at the join. A single live consonant host
+  (म) always keeps its अ regardless of the C6 default.
+- **Latent categorization bug fixed**: `घर` was in `HALANTA_FINAL` (DELETE),
+  but it is pronounced WITH final अ (`ghar`), confirmed by `घरलाई`→`gharlai`.
+  Moved `घर` to `RETAIN_FINAL` in `u5_reference.py` + lexicon (C6-R, retain=True;
+  tokens unchanged `['gh','a','r']`).
+- **Files changed**: `nspc/core/rules.py` (added `लाई` to `_POSTPOSITIONS`;
+  rewrote host-join logic to use U5 + consonant-count), `nspc/core/u5_reference.py`
+  (घर moved HALANTA_FINAL→RETAIN_FINAL), `nspc/core/lexicon.py` (घर C6-H→C6-R),
+  `tests/test_standard_regression.py` + `docs/SPECIFICATION.md` (घर expectation
+  updated C6-H/False → C6-R/True).
+- **Verified (TTS listening)**: `साउनमा`→saunma, `साउनलाई`→saunlai both correct.
+- **Regression suite**: `करणबाट`→karanbata restored; `मलाई`→malai, `घरलाई`→gharlai
+  correct. All 4 suites GREEN (test_native_audit 29, test_no_trailing_schwa,
+  test_standard_regression, test_matra_inventory_consistency).
+
 ## 6. KNOWN LIMITATIONS
 
 - Final schwa is partially idiosyncratic in Nepali; handled via C6 default +
@@ -137,8 +168,9 @@ pal, sal, chamal, kun, tar, sar, park, school, kitab, desh.
 py tests/test_native_audit.py
 py tests/test_no_trailing_schwa.py
 py tests/test_standard_regression.py
+py tests/test_matra_inventory_consistency.py
 ```
-All three must stay GREEN. The regression .py files are standalone scripts
+All four must stay GREEN. The regression .py files are standalone scripts
 (call sys.exit), NOT pytest-collectable modules.
 
 ## 8. QUICK DEMO

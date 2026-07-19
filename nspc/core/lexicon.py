@@ -162,9 +162,9 @@ class Lexicon:
                                        "m", "a", "N", "t", "r", "i:"],
                              "branch": "C6", "retain": True,
                              "note": "pradhan+mantri (compound join schwa dropped)"},
-            # native halanta: final अ dropped (ghar), not retained.
-            "घर":       {"tokens": ["gh", "a", "r"], "branch": "C6-H",
-                         "retain": False, "note": "ghar (traditional halanta)"},
+            # native word that KEEPS final /a/ (ghar), not a halanta drop.
+            "घर":       {"tokens": ["gh", "a", "r"], "branch": "C6-R",
+                          "retain": True, "note": "ghar (keeps final अ)"},
             # foreign loan: donor drops final schwa (school), not retained.
             "स्कुल":      {"tags": {"foreign": True, "donor_schwa": False},
                          "branch": "C5", "retain": False,

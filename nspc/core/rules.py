@@ -104,7 +104,7 @@ VISARGA = "\u0903"      # ः
 _POSTPOSITIONS = [
     "जस्तै", "आदि", "वाला", "दार", "सँगै", "पछि", "अघि", "भरि", "सम्म",
     "हरू", "हरु", "सँग", "तिर", "बाट", "मा", "ले", "को", "का", "पनि", "सित",
-    "पटक", "पल्ट", "पति", "बिना", "सँग",
+    "पटक", "पल्ट", "पति", "बिना", "सँग", "लाई",
 ]
 _POSTPOS_SET = set(_POSTPOSITIONS)
 
@@ -146,6 +146,15 @@ def _cluster_key(cps, i):
     return None
 
 
+def _segment_raw(word):
+    """Standalone orthographic segmentation of `word` (U5 applied, no R7 join
+    logic). Used by R7 to inspect a compound HOST's standalone final-vowel
+    behaviour. `word` is always shorter than the full compound, so this
+    terminates without recursion."""
+    toks, _ = segment(word)
+    return toks
+
+
 def segment(word, tags=None):
     """Core: Devanagari word -> list of canonical tokens, applying U5 to the
     FINAL schwa. Returns (tokens, trace_steps).
@@ -180,9 +189,14 @@ def segment(word, tags=None):
 
     # R7: find the host-final consonant index if the word ends in a known
     # postposition. The join schwa (host's last consonant's inherent /a/) is
-    # deleted. Only applies when the postposition is a true suffix of the word
-    # and there is at least one host consonant before it.
+    # deleted when joining -- but ONLY when the host itself, pronounced
+    # standalone, already drops that final consonant's inherent /a/ (i.e. the
+    # host ends in a halanta/dead consonant). E.g. नेपाल -> nepal (ल drops),
+    # so नेपालको -> nepalko (no extra schwa); साउन -> saun (न drops), so
+    # साउनलाई -> saunlai. But म -> ma (लाई keeps its /a/), so मलाई -> malai
+    # (the host's final /a/ is retained, NOT deleted at the join).
     join_idx = -1
+    host_drops_final_a = False
     for suf in sorted(_POSTPOS_SET, key=len, reverse=True):
         if s.endswith(suf) and len(s) > len(suf):
             host = s[:len(s) - len(suf)]
@@ -191,6 +205,23 @@ def segment(word, tags=None):
                         (j + 1 >= len(host) or host[j + 1] != VI_RAMA):
                     join_idx = j
                     break
+            # Determine the host's standalone final-vowel behaviour. The host
+            # KEEPS its final inherent /a/ at the join iff, pronounced standalone,
+            # it retains its final schwa per U5 — UNLESS the host is a single
+            # live consonant (e.g. म -> "ma"), which always keeps its inherent
+            # /a/ regardless of the C6 default. Examples:
+            #   म     -> ma     (single live C, keeps) -> मलाई   = malai
+            #   घर    -> ghar   (U5 RETAIN, keeps)      -> घरलाई  = gharlai
+            #   यस    -> yas    (U5 RETAIN, keeps)      -> यसलाई  = yaslai
+            #   नेपाल -> nepal  (U5 DELETE, drops)      -> नेपालको = nepalko
+            #   साउन  -> saun   (U5 DELETE, drops)      -> साउनलाई = saunlai
+            #   करण   -> karan  (U5 DELETE, drops)      -> करणबाट = karanbata
+            from .u5_reference import u5 as _u5
+            from .normalize import auto_tag as _auto_tag
+            _, _host_retain, _ = _u5(host, _auto_tag(host))
+            _host_cons = sum(1 for c in host if _is_consonant_base(c))
+            host_drops_final_a = (not _host_retain) and \
+                (_host_cons > 1 or host.endswith(VI_RAMA))
             break
 
     while i < n:
@@ -244,7 +275,8 @@ def segment(word, tags=None):
                     j += 1
                 if j < n and _is_consonant_base(cps[j]):
                     medial = _medial_cluster(cp, cps[j])
-            if (is_final and not retain) or (i == join_idx) or medial:
+            if (is_final and not retain) or \
+                    (i == join_idx and host_drops_final_a) or medial:
                 pass  # suppress inherent /a/
             else:
                 out.append("a")

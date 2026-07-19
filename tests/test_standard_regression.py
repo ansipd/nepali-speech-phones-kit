@@ -33,7 +33,7 @@ def expect(orth, tags, branch, retain):
 
 print("=== (A) UNIT TRACES (SPEC §12) ===")
 expect("विकास", make_tags("विकास", conjunct=True, tatsama=True), "C1", True)
-expect("घर",   make_tags("घर"), "C6-H", False)
+expect("घर",   make_tags("घर"), "C6-R", True)   # ghar: keeps final अ
 expect("हुन्",   make_tags("हुन्", verb=True), "C0", False)   # न् carries virama
 expect("छन्",   make_tags("छन्", verb=True), "C0", False)   # न् carries virama
 expect("हुन्छ", make_tags("हुन्छ", verb=True, verb_final_live=True), "C2b", True)
