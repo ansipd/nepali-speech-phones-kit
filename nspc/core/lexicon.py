@@ -147,14 +147,14 @@ class Lexicon:
 
     def lookup(self, word):
         """Return cached entry dict or None."""
-        s = _nz.NFC(word)
+        s = _nz.canonicalize(word)
         return self._entries.get(s)
 
     def process(self, word):
         """Return (tokens, tags, branch, retain, source).
 
         source = 'lexicon' if found, else 'rule' (U5 fallback)."""
-        s = _nz.NFC(word)
+        s = _nz.canonicalize(word)
         entry = self._entries.get(s)
         if entry is not None:
             # Seed entries carry UNRELIABLE corpus GT (per project methodology:

@@ -48,6 +48,25 @@ def NFC(text):
     return unicodedata.normalize("NFC", text)
 
 
+# Spelling variants that are phonetically identical (native-confirmed): the same
+# word is written two ways. We map the less-common spelling onto the canonical
+# one so the rule engine needs only ONE entry. Confirmed by native review:
+#   मंच (anusvara ं) == मञ्च (conjunct ञ) -> both "manch".
+_SPELLING_VARIANTS = {
+    "\u092e\u0902\u091a": "\u092e\u091e\u094d\u091a",  # मंच -> मञ्च
+}
+
+
+def canonicalize(text):
+    """R1.3b — NFC + collapse native-confirmed spelling variants to one form.
+    Applied at the entry point of both segment() and lexicon.process so the
+    engine treats मंच and मञ्च identically."""
+    s = NFC(text)
+    if s in _SPELLING_VARIANTS:
+        return _SPELLING_VARIANTS[s]
+    return s
+
+
 def is_dead(s):
     """R1.4 — true if the string ends in a virama (dead final consonant)."""
     return s.endswith(VI_RAMA)

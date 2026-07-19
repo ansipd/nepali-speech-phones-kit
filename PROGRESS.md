@@ -321,3 +321,18 @@ the authority over unreliable corpus GT.
 - Confirmed by native review: संस्कृति phonetically "sanskriti" (nasal consonant
   before स), so the nasal-consonant realization is correct, not vowel nasalization.
 
+### 5f. JOINT REVIEW OF THE 9 CURATED ENTRIES (2026-07-19)
+Reviewed each of the 9 remaining curated entries with the native speaker:
+- **यस**: yus/yas/yes all sound identical -> curated `yus` KEPT, no change.
+- **मञ्च / मंच**: confirmed SAME word (anusvara vs conjunct spelling). Added
+  `normalize._SPELLING_VARIANTS` mapping मंच -> मञ्च, applied in both
+  `rules.segment` and `lexicon.process` via `canonicalize()`. Both yield "manch"
+  through the rule (no separate lexicon entry for मंच).
+- **उसले / सरकार**: medial schwa deletion confirmed, but the deletion site is
+  word-specific (उसले drops स's अ; सरकार drops र's अ). No safe single general
+  rule without a stem-splitter -> both KEPT curated.
+- **विकास, अनलाइन, हिँड्न, काठमान्डु, पार्क**: confirmed KEPT curated.
+- Net code change: only the मंच->मञ्च spelling-variant map (rule-based). The 9
+  curated entries remain; this is the honest, auditable stopping point.
+- All 5 suites GREEN. Not yet committed (pending push).
+

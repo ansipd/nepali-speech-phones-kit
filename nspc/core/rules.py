@@ -217,7 +217,7 @@ def segment(word, tags=None):
     ne-pa-la-ko). The schwa is dropped at the STEM JOIN, not at the suffix's
     own end (postpositions keep their own final अ, verified native).
     """
-    s = _nz.NFC(word)
+    s = _nz.canonicalize(word)
     steps = ["NFC: " + s]
 
     if tags is None:

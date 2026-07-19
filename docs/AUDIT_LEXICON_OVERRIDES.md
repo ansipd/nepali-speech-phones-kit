@@ -36,7 +36,7 @@ could wrongly change other words. They stay curated until native-reviewed.
 | यस | yus | अ→u sound change | Genuine irregular — no rule. |
 | उसले | usle | medial schwa after स deleted | Pattern (schwa after स) — rule-able with native confirmation. |
 | सरकार | sarkar | medial schwa after स deleted | Pattern (schwa after स) — rule-able with native confirmation. |
-| मञ्च | manch | ञ→n assimilation (speech variant) | Pattern (ञ after म) — rule-able with native confirmation. |
+| मञ्च | manch | ञ→n assimilation (speech variant) | Spelling-equivalent with मंच (anusvara); both map to मञ्च via normalize._SPELLING_VARIANTS. |
 | अनलाइन | aNliN | medial schwas deleted | Loan "online"; falls under schwa-after-स pattern. |
 | हिँड्न | hidnu | infinitive न् retained | Genuine irregular (infinitive morphology). |
 | काठमान्डु | kathamandu | proper noun, native spelling | Genuine irregular (place name). |
@@ -53,10 +53,19 @@ could wrongly change other words. They stay curated until native-reviewed.
 ## REMAINING RULE-BASED OPPORTUNITIES (future sessions, native confirmation needed)
 1. **उसले/सरकार/अनलाइन** → medial schwa-deletion-after-स pattern (R7-general).
    Needs native review on a list of स-initial-medial words before generalizing.
-2. **मञ्च** → ञ→n assimilation rule (ञ after म → n).
-3. **पार्क** → foreign-loan detection (tabled).
-4. **विकास** → supply tatsama tag via a classifier (currently curated only for its
+2. **पार्क** → foreign-loan detection (tabled).
+3. **विकास** → supply tatsama tag via a classifier (currently curated only for its
    etymology tag; the retain behaviour is already a rule).
+
+## NATIVE REVIEW NOTES (2026-07-19, joint review of the 9)
+- **यस**: yus / yas / yes all sound identical to native ear -> curated `yus`
+  kept, no change.
+- **मञ्च / मंच**: confirmed the SAME word (two spellings, anusvara vs conjunct).
+  normalize._SPELLING_VARIANTS maps मंच -> मञ्च, so both yield "manch".
+- **उसले / सरकार**: confirmed medial schwa deletion, but the deletion site is
+  word-specific (उसले drops स's अ; सरकार drops र's अ). No safe single general
+  rule without a stem-splitter; both remain curated.
+- **विकास, अनलाइन, हिँड्न, काठमान्डु, पार्क**: confirmed keep as curated.
 
 ## FINAL STATE (2026-07-19)
 - 15 redundant overrides deleted; rule engine is authoritative over unreliable
