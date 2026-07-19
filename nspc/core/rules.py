@@ -142,10 +142,15 @@ _STOP = {"\u0915", "\u0916", "\u0917", "\u0918",  # क ख ग घ
 
 
 def _medial_cluster(c1, c2):
-    """True if C1 + C2 forms a valid medial cluster (delete C1's schwa)."""
-    # fricative (श/ष) + stop  -> cluster (e.g. श्प, ष्ट)
-    if c1 in _FRICATIVE and c2 in _STOP:
-        return True
+    """True if C1 + C2 forms a valid medial cluster (delete C1's schwa).
+
+    NOTE: a blanket 'fricative + stop' rule was REMOVED. Conjuncts are written
+    with an explicit virama (e.g. स्क = स्+क) and handled by CLUSTER_MAP; a bare
+    fricative+stop sequence without virama is NOT a native cluster (e.g. the
+    foreign name शकिरा = sha-ki-ra, श keeps its inherent /a/). Native post-स
+    words (आकाशको, देशबाट, ...) keep their fricative's /a/ via the host-final
+    path, not this rule.
+    """
     return False
 
 
@@ -226,6 +231,13 @@ def segment(word, tags=None):
 
     cps = list(s)
     out = []
+
+    # Postpositions / derivational suffixes (नामयोगी / सम्बन्धवाचक) are never
+    # pronounced in isolation; they always attach to a preceding host word and
+    # KEEP their final inherent /a/ (e.g. सँग -> "saga", not "sag"). They are
+    # therefore exempt from the C6 final-schwa DELETE that applies to bare nouns.
+    is_postposition = (s in _POSTPOS_SET) or \
+        any(s.endswith(p) for p in _POSTPOS_SET if len(p) < len(s))
     i = 0
     n = len(cps)
 
@@ -317,7 +329,7 @@ def segment(word, tags=None):
                     j += 1
                 if j < n and _is_consonant_base(cps[j]):
                     medial = _medial_cluster(cp, cps[j])
-            if (is_final and not retain) or \
+            if (is_final and not retain and not is_postposition) or \
                     (i == join_idx and host_drops_final_a) or medial:
                 pass  # suppress inherent /a/
             else:

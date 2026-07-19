@@ -176,6 +176,35 @@ pal, sal, chamal, kun, tar, sar, park, school, kitab, desh.
 - **Files changed**: `nspc/core/rules.py` (split nasal handlers, `_ANUSVARA_NASAL`,
   `_next_consonant_token` helper).
 
+## 5d. FIX LOG (2026-07-19) — सँग final अ + foreign-name medial अ
+
+- **User correction (native ear)**:
+  1. `सँग` (सम्बन्धवाचक / postposition, never standalone) -> **saga**, NOT
+     "sag". The final inherent /a/ of ग is RETAINED. Consistently:
+     घरसँग->gharasaga, नेपालसँग->nepalsaga, मसँग->masaga, हामीसँग->hamisaga.
+  2. `शकिरा` (foreign name, Shakira) -> **shakira**, NOT "shkira". The initial
+     श must keep its inherent /a/ (sha), because it is NOT a native onset cluster.
+- **Root causes**:
+  - Final-अ: postpositions were subject to the C6 final-schwa DELETE like bare
+    nouns. Fixed by exempting postpositions (`is_postposition` flag in segment):
+    a postposition keeps its final inherent /a/.
+  - Medial-अ: `_medial_cluster` had a BLANKET rule "fricative(श/ष)+stop -> drop
+    first's अ". This wrongly deleted श's अ in शकिरा (श+क medial). Native words
+    do NOT rely on this: their fricatives (आकाश, देश, विकास...) are HOST-FINAL
+    (handled by the host-final path, not medial), and conjuncts use an explicit
+    virama (स्क=स्+क, handled by CLUSTER_MAP). So the blanket rule was dead
+    weight for natives and harmful for foreign names.
+- **Fix**: `_medial_cluster` now returns False (conjuncts via virama/CLUSTER_MAP
+  only). `is_postposition` (word in/_POSTPOS_SET or ends with one) exempts the
+  final-schwa DELETE. Verified: शकिरा->shakira; the 30 corpus fricative+postposition
+  words (आकाशको, देशबाट, विकासजस्तै...) are UNCHANGED. All 4 suites GREEN.
+- **Foreign/loan-word finalization deferred**: user wants a rule-based foreign
+  detection (not word lists). Tabled for a later session; शकिरा fixed via the
+  corrected medial-cluster rule (it is not a native conjunct), not via a lexicon
+  entry.
+- **Files changed**: `nspc/core/rules.py` (`_medial_cluster`→False; `is_postposition`
+  flag + final-अ exemption).
+
 ## 6. KNOWN LIMITATIONS
 
 - Final schwa is partially idiosyncratic in Nepali; handled via C6 default +
