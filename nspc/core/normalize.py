@@ -53,6 +53,27 @@ def is_dead(s):
     return s.endswith(VI_RAMA)
 
 
+# Devanagari consonant base range (KA..HA, U+0915..U+0939). Excludes matras,
+# virama, chandrabindu/anusvara, and independent vowels (अ..औ, U+0905..U+0914).
+_CONSONANT_BASE = ("\u0915", "\u0939")
+
+
+def is_consonant_base(c):
+    """True if char c is a Devanagari consonant base (no inherent-vowel mark)."""
+    return "\u0915" <= c <= "\u0939"
+
+
+def is_halo(s):
+    """True if the word is a single live consonant with NO matra / vowel mark /
+    virama (e.g. म, त, क, स). Such a word is always pronounced with its
+    inherent /a/ (ma, Ta, ka, sa) — there is no following syllable to absorb it.
+    A consonant WITH a matra (मा, कि) or virama (क्) is NOT a halo."""
+    cps = list(NFC(s))
+    if len(cps) != 1:
+        return False
+    return is_consonant_base(cps[0])
+
+
 def split_chars(s):
     """Return list of unicode characters (Devanagari is not one-codepoint-per-
     grapheme; virama+consonant form conjuncts but we keep raw cps)."""
@@ -211,6 +232,9 @@ def auto_tag(word, **etym):
         # dead = virama at the very end of the word (single dead final C),
         # OR a dead-final verb suffix (न्).
         "dead": facts["dead_final"] or (is_verb_final and not is_verb_final_live),
+        # halo = a single live consonant with no matra/virama (म, त, क, स).
+        # Always retains inherent /a/. High priority in U5 (after C0 dead).
+        "halo": is_halo(s),
         # conjunct = word ends in a conjunct cluster (...C virama C[final]),
         # EXCEPT when that cluster is a verb-suffix (handled separately).
         "conjunct": facts["conjunct_final"] and not is_verb_final,

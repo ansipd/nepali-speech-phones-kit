@@ -121,8 +121,6 @@ class Lexicon:
             # These override OOV-rule errors where Nepali deletes/keeps a
             # schwa that the orthography-only rule gets wrong. Each carries
             # its validated canonical tokens directly (authoritative).
-            "म":       {"tokens": ["m", "a"], "branch": "C6", "retain": True,
-                        "note": "pronoun keeps final अ (ma)"},
             "दुख":      {"tokens": ["d", "u", "kh", "a"], "branch": "C6",
                         "retain": True, "note": "dukha (final अ kept)"},
             "सुख":      {"tokens": ["s", "u", "kh", "a"], "branch": "C6",

@@ -23,12 +23,11 @@
 All now resolve via the rule engine (src=rule). Zero behaviour regression
 (verified: भन्छ→bhaNcha, स्कन्ध→skaNDha, पुस्तकालय→pusTaka:laya, etc.).
 
-### KEEP — genuinely irregular (12 entries remain curated)
+### KEEP — genuinely irregular (11 entries remain curated)
 | Word | Tokens | Why curated |
 |------|--------|-------------|
 | पार्क | pa:rk | foreign loan C5 (foreign detection TABBED) |
 | विकास | wika:sa | tatsama C4 retain (kept for clarity) |
-| म | ma | single live consonant keeps अ (rule fix pending) |
 | दुख | dukha | final अ kept (RETAIN_FINAL candidate) |
 | सुख | sukha | final अ kept (RETAIN_FINAL candidate) |
 | यस | yus | अ→u sound change (irregular) |
@@ -39,10 +38,13 @@ All now resolve via the rule engine (src=rule). Zero behaviour regression
 | हिँड्न | hidnu | infinitive न् retained |
 | काठमान्डु | kathamandu | proper noun, native spelling |
 
+> `म` override DELETED (2026-07-19): single live consonant now RETAINED via
+> new U5 C-HALO branch + `is_halo` in normalize.auto_tag. म→ma, त→Ta, क→ka,
+> स→sa, etc. all rule-derived.
+
 ## REMAINING RULE-BASED OPPORTUNITIES (future sessions)
-1. **म** → ma: single live consonant keeps inherent अ (rule fix; then delete).
-2. **दुख/सुख** → RETAIN_FINAL candidates (final अ kept).
-3. **मञ्च** → ञ→n assimilation rule.
-4. **उसले/सरकार/अनलाइन** → medial schwa-deletion-after-स/र pattern (R7-general).
-5. **पार्क** → foreign-loan detection (tabled).
+1. **दुख/सुख** → RETAIN_FINAL class.
+2. **मञ्च** → ञ→n assimilation rule.
+3. **उसले/सरकार/अनलाइन** → medial schwa-deletion-after-स/र pattern (R7-general).
+4. **पार्क** → foreign-loan detection (tabled).
 

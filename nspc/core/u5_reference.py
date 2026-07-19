@@ -76,6 +76,12 @@ def u5(orth, tags):
     """Returns (branch_id, retain: bool, trace_note). Pure function of tags."""
     if tags.get("dead"):
         return ("C0", False, "final consonant DEAD (virama) -> DELETE")
+    # Halo — a word consisting of a SINGLE live consonant (e.g. म, त, क, स) is
+    # always pronounced with its inherent /a/ (ma, Ta, ka, sa); there is no
+    # following syllable to delete it into. General rule, no exceptions. This
+    # subsumes the prior curated override for म -> ma.
+    if tags.get("halo"):
+        return ("C-HALO", True, "single live consonant -> RETAIN inherent /a/")
     if tags.get("conjunct"):
         if tags.get("lneg") or orth in L_NEG:
             return ("C1-Lneg", False, "conjunct + L_neg (Newar/surname) -> DELETE")

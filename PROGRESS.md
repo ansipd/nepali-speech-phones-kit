@@ -56,6 +56,8 @@ data/sample_sentences.txt  10 T6 sentences
 - C3: function word -> RETAIN
 - C4: tatsama -> RETAIN (except TATSAMA_DELETE: देश=desh)
 - C5: foreign -> DONOR pronunciation (पार्क/स्कुल/किताब -> DELETE)
+- C-HALO: a SINGLE live consonant (म/त/क/स...) -> RETAIN inherent /a/
+  (ma/Ta/ka/sa). General rule, no exceptions; subsumes former म lexicon entry.
 - C6: DEFAULT native live-final noun/adj -> **DELETE** (see §3D exceptions)
 
 ### R7 — compound / sandhi
@@ -278,9 +280,18 @@ the authority over unreliable corpus GT.
 - Commit 8a730e1 pushed to GitHub (private: ansipd/nepali-speech-phones-kit).
 
 ### Remaining rule-based opportunities (future)
-1. म → ma (single live consonant keeps अ).
-2. दुख/सुख → RETAIN_FINAL class.
-3. मञ्च → ञ→n assimilation rule.
-4. उसले/सरकार/अनलाइन → medial schwa-deletion-after-स/र pattern.
-5. पार्क → foreign-loan detection (tabled).
+1. दुख/सुख → RETAIN_FINAL class.
+2. मञ्च → ञ→n assimilation rule.
+3. उसले/सरकार/अनलाइन → medial schwa-deletion-after-स/र pattern.
+4. पार्क → foreign-loan detection (tabled).
+
+### 5c. SINGLE-CONSONANT HALO RULE (2026-07-19) — all GREEN
+- New U5 branch `C-HALO`: a word of exactly one live consonant with no
+  matra/virama (म, त, क, स...) always retains inherent /a/ (ma, Ta, ka, sa).
+  Implemented via `normalize.is_halo()` → `auto_tag` `halo` tag → U5 C-HALO
+  RETAIN. This is the most general form of the R7 comment "म -> ma".
+- Deleted the curated `म -> ma` override (now rule-derived). Lexicon now 11
+  genuine irregularities.
+- Verification: म/त/क/स/न/र/य/ह/व/ल/प all -> ...a via rule (src=rule).
+  All 4 suites GREEN. Not yet committed (pending user review).
 
