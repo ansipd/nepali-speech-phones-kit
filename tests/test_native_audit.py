@@ -51,7 +51,7 @@ AUDIT = [
     ("करणबाट", ["k", "a", "r", "a", "n", "b", "a:", "t", "a"], "C6", "karanbata (join schwa deleted; बा=long a:)"),
     ("देशतिर", ["D", "e", "sh", "T", "i", "r", "a"], "C6", "deshtira (final अ kept)"),
     # --- affricates palatal (D1) ---
-    ("चिनियाँ", ["c", "i", "n", "i", "y", "a"], "C6", "chiniya (nasal dropped)"),
+    ("चिनियाँ", ["c", "i", "N", "i", "y", "a:~"], "C6", "chiniya~ (याँ = long nasal a:~, per native: या is LONG)"),
     ("छाता", ["ch", "a:", "T", "a:"], "C6", "palatal छ=tʃʰ; आ matra = long aː"),
     # --- final-अ kept on short words (native validated) ---
     ("म", ["m", "a"], "C6", "pronoun ma"),

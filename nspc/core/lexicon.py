@@ -95,7 +95,7 @@ class Lexicon:
                 retain = (str(pred).strip().upper() == "Y")
                 self._entries[word] = {
                     "tags": tags, "branch": branch, "retain": retain,
-                    "origin": origin, "pos": pos,
+                    "origin": origin, "pos": pos, "seed": True,
                 }
         self._load_curated()
 
@@ -113,18 +113,10 @@ class Lexicon:
             # foreign loan ending in a conjunct (र्क) -> delete final schwa
             "पार्क":   {"tags": {"foreign": True, "donor_schwa": False},
                         "branch": "C5", "retain": False},
-            # tatsama: विकास retains final schwa (vikās); देश deletes (deś)
+            # tatsama: विकास retains final schwa (vikās). (देश now covered by
+            # U5 TATSAMA_DELETE; verb forms भन्छ/सुत्छ/हुन्छ/भएन by U5 C2b;
+            # देशतिर/स्कन्ध/स्कुल by rule — all removed as redundant 2026-07-19.)
             "विकास":   {"tags": {"tatsama": True}, "branch": "C4", "retain": True},
-            "देश":     {"tags": {"tatsama": True}, "branch": "C4", "retain": False},
-            # verb live-final retain (R6.3b), explicit for safety
-            "भन्छ":     {"tags": {"verb": True, "verb_final_live": True},
-                        "branch": "C2b", "retain": True},
-            "सुत्छ":     {"tags": {"verb": True, "verb_final_live": True},
-                        "branch": "C2b", "retain": True},
-            "हुन्छ":     {"tags": {"verb": True, "verb_final_live": True},
-                        "branch": "C2b", "retain": True},
-            "भएन":     {"tags": {"verb": True, "verb_final_live": True},
-                        "branch": "C2b", "retain": True},
             # --- native-validated corrections (T6 listening review) ---------
             # These override OOV-rule errors where Nepali deletes/keeps a
             # schwa that the orthography-only rule gets wrong. Each carries
@@ -143,43 +135,11 @@ class Lexicon:
                         "retain": True, "note": "sarkar (schwa after स deleted)"},
             "मञ्च":      {"tokens": ["m", "a", "n", "ch"], "branch": "C1",
                         "retain": False, "note": "manch (ञ silent; final अ dropped, speech variant)"},
-            "देशतिर":    {"tokens": ["D", "e", "sh", "T", "i", "r", "a"],
-                        "branch": "C6", "retain": True,
-                        "note": "deshtira (final अ kept; native overrides GT 'destir')"},
-            "चिनियाँ":   {"tokens": ["c", "i", "n", "i", "y", "a"], "branch": "C6",
-                        "retain": True, "note": "chiniya (nasal dropped)"},
             "अनलाइन":    {"tokens": ["a", "N", "l", "i", "N"], "branch": "C6",
                         "retain": True, "note": "unline (medial schwas deleted)"},
             "हिँड्न":     {"tokens": ["h", "i~", "d", "n", "u"], "branch": "C0",
                         "retain": True,
                         "note": "hidnu (infinitive न् retained; C0 exception)"},
-            # conjunct-final tadbhava: final live member keeps अ (C1)
-            "स्कन्ध":     {"tags": {"conjunct": True}, "branch": "C1",
-                        "retain": True, "note": "skandha (conjunct-final keeps अ)"},
-            # compound प्रधान + मन्त्री: stem-final न is halanta (pradhan),
-            # join schwa drops -> pradhanmantri (native-validated, T6).
-            "प्रधानमन्त्री": {"tokens": ["p", "r", "a", "Dh", "a", "N",
-                                       "m", "a", "N", "t", "r", "i:"],
-                             "branch": "C6", "retain": True,
-                             "note": "pradhan+mantri (compound join schwa dropped)"},
-            # foreign loan: donor drops final schwa (school), not retained.
-            "स्कुल":      {"tags": {"foreign": True, "donor_schwa": False},
-                         "branch": "C5", "retain": False,
-                         "note": "school (foreign loan, final अ dropped)"},
-            # --- native words that KEEP final /a/ (override C6 DELETE default) -
-            "पुस्तकालय": {"tokens": ["p", "u", "s", "T", "a", "k", "a", "l", "a", "y", "a"],
-                         "branch": "C6", "retain": True,
-                         "note": "pustakalaya (keeps final अ)"},
-            "अर्थशास्त्र": {"tokens": ["a", "r", "Th", "a", "sh", "a", "s", "t", "r", "a"],
-                           "branch": "C6", "retain": True,
-                           "note": "arthashastra (keeps final अ)"},
-            "मित्रता":   {"tokens": ["m", "i", "t", "r", "a", "T", "a"], "branch": "C6",
-                         "retain": True, "note": "mitrata (keeps final अ)"},
-            "साहित्य":   {"tokens": ["s", "a", "h", "i", "t", "y", "a"], "branch": "C6",
-                         "retain": True, "note": "sahitya (keeps final अ)"},
-            # medial ल drops its inherent अ (सफल=saphal) before ता -> saphalta
-            "सफलता":   {"tokens": ["s", "a", "ph", "a", "l", "T", "a"], "branch": "C6",
-                         "retain": True, "note": "saphalta (medial ल schwa deleted)"},
             # काठमान्डु -> kathmandu (native spelling मान्डु; न्डु -> ndu)
             "काठमान्डु": {"tokens": ["k", "a", "th", "a", "m", "a", "n", "d", "u"],
                          "branch": "C6", "retain": True,
@@ -203,6 +163,17 @@ class Lexicon:
         s = _nz.NFC(word)
         entry = self._entries.get(s)
         if entry is not None:
+            # Seed entries carry UNRELIABLE corpus GT (per project methodology:
+            # corpus GT is wrong vs native ear on final schwa/conjuncts). The
+            # reference rule engine (U5 + segment) is authoritative for them, so
+            # route seed-only words to the pure-rule fallback. Only CURATED
+            # entries (explicit validated tokens OR tags) override the rule.
+            if entry.get("seed") and entry.get("tokens") is None:
+                tags = _nz.auto_tag(s)
+                tokens, steps = _rules.segment(s, tags)
+                from .u5_reference import u5
+                branch, retain, note = u5(s, tags)
+                return tokens, tags, branch, retain, "rule"
             # Curated entry with explicit validated tokens: authoritative,
             # bypasses all rule re-derivation (native listening-review).
             if entry.get("tokens") is not None:
