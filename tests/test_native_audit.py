@@ -40,19 +40,19 @@ AUDIT = [
     ("मञ्च", ["m", "a", "n", "ch"], "C1", "manch (final अ dropped, speech variant)"),
     # --- tatsama RETAIN (C4) / native DELETE (C6) ---
     ("सरकार", ["s", "a", "r", "k", "a", "r"], "C6", "sarkar (medial schwa deleted)"),
-    ("विकास", ["w", "i", "k", "a", "s", "a"], "C4", "tatsama retain (vikās)"),
+    ("विकास", ["w", "i", "k", "a:", "s", "a"], "C4", "tatsama retain (vikās; का=long a:)"),
     ("देश", ["D", "e", "sh"], "C4", "tatsama delete (deś)"),
     ("घर", ["gh", "a", "r"], "C6", "native delete"),
-    ("नेपाल", ["N", "e", "p", "a", "l"], "C6", "native delete"),
+    ("नेपाल", ["N", "e", "p", "a:", "l"], "C6", "native delete; पा=long a:"),
     # --- foreign loan DELETE (C5) ---
-    ("पार्क", ["p", "a", "r", "k"], "C5", "foreign delete"),
+    ("पार्क", ["p", "a:", "r", "k"], "C5", "foreign delete; पा=long a:"),
     ("स्कुल", ["s", "k", "u", "l"], "C6", "foreign loan delete"),
     # --- compound: join-schwa deleted (R7), suffix keeps its own अ ---
-    ("करणबाट", ["k", "a", "r", "a", "n", "b", "a", "t", "a"], "C6", "karanbata (join schwa deleted)"),
+    ("करणबाट", ["k", "a", "r", "a", "n", "b", "a:", "t", "a"], "C6", "karanbata (join schwa deleted; बा=long a:)"),
     ("देशतिर", ["D", "e", "sh", "T", "i", "r", "a"], "C6", "deshtira (final अ kept)"),
     # --- affricates palatal (D1) ---
     ("चिनियाँ", ["c", "i", "n", "i", "y", "a"], "C6", "chiniya (nasal dropped)"),
-    ("छाता", ["ch", "a", "T", "a"], "C6", "palatal छ=tʃʰ"),
+    ("छाता", ["ch", "a:", "T", "a:"], "C6", "palatal छ=tʃʰ; आ matra = long aː"),
     # --- final-अ kept on short words (native validated) ---
     ("म", ["m", "a"], "C6", "pronoun ma"),
     ("दुख", ["d", "u", "kh", "a"], "C6", "dukha"),

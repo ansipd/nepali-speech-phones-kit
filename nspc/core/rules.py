@@ -30,7 +30,7 @@ VI_RAMA = "\u094d"
 # Matra (dependent vowel) -> canonical vowel token
 # ---------------------------------------------------------------------------
 MATRA_TO_VOWEL = {
-    "\u093e": "a",    # ा  -> a  (inherent 'a' written explicitly; we keep a)
+    "\u093e": "a:",   # ा  -> a: (long vowel)
     "\u093f": "i",    # ि  -> i
     "\u0940": "i:",   # ी  -> i:
     "\u0941": "u",    # ु  -> u
