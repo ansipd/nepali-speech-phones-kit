@@ -3,9 +3,11 @@
 **Project**: Deterministic, citable Nepali pronunciation Standard v1.0 + universal
 engine-agnostic G2P frontend for TTS training (no trained voice).
 **Location**: `C:\Users\Sandip Ghimire\nepali-speech-phones-kit\`
-**Status**: All 5 test suites GREEN as of 2026-07-19. Lexicon pruned to 8
-genuine irregularities; rule engine now authoritative over unreliable seed GT;
-nasal ँ/ं split regression-locked (R3.4).
+**Status**: All 7 test suites GREEN as of 2026-07-20 (added test_schwa_ohala
++ test_numbers). Lexicon pruned to 8 genuine irregularities; rule engine now
+authoritative over unreliable seed GT; nasal ँ/ं split regression-locked (R3.4);
+number verbalization module (cardinals, year==count, decimals, minus, separators)
+added and edge-case hardened.
 
 ---
 
@@ -502,9 +504,24 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
   - End-to-end: `tokenize_with_numbers` splits numbers into devanagari word
     tokens; each flows through `lx.process` correctly.
 
-  **Status**: all 7 suites GREEN (added test_numbers). NOT committed/pushed
-  (per project policy). Out of scope for v0: ordinals, currency (रुपैयाँ),
-  percentages, fractions (१/२).
+  **Edge-case hardening (2026-07-20, same session)**:
+  - Added `clean_numeric()` helper: strips grouping separators (`,`, Devanagari
+    commas U+0964/U+0965), normalizes a leading minus (`-`, `−`, `–`, `—`) to
+    the word `माइनस`, and normalizes a bare fraction (`.5`) to `0.5`.
+  - `-15` -> `माइनस पन्ध्र` (previously broken -> `-पन्ध्र`).
+  - `1,50,000` -> `एक लाख पचास हजार` (previously broken -> `एक,पचास,शून्य`);
+    `_DIGIT_RE` extended to consume separators so the whole run is one match.
+  - `.5` -> `शून्य प्वाइन्ट पाँच` (previously broken -> `.पाँच`); `0.5` already OK.
+  - Devanagari-digit minus `-१५` -> `माइनस पन्ध्र`.
+  - `tokenize_with_numbers` now preserves a leading minus so it expands into a
+    `माइनस` token (previously the tokenizer stripped `-` as punctuation).
+  - Comma-containing runs now work through `normalize_numbers_in_text` at the
+    sentence level, e.g. `तल 1,50,000 मानिस थिए। -15 डिग्री`
+    -> `तल एक लाख पचास हजार मानिस थिए। माइनस पन्ध्र डिग्री`.
+
+  **Status**: all 7 suites GREEN (added test_numbers, extended with edge cases).
+  Committed + pushed (number module + edge fixes). Out of scope for v0: ordinals,
+  currency (रुपैयाँ), percentages, fractions (१/२).
 
 
 

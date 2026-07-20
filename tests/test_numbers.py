@@ -14,6 +14,11 @@ Native-validated expectations:
   - 12.55       -> बाह्र प्वाइन्ट पाँच पाँच (fractional digits read individually)
   - 12.5 formal -> बाह्र दशमलव पाँच  (formal separator)
   - Devanagari digits १२.५ behave identically to ASCII 12.5
+  - -15        -> माइनस पन्ध्र          (leading minus sign)
+  - 1,50,000   -> एक लाख पचास हजार    (grouping separators consumed)
+  - .5         -> शून्य प्वाइन्ट पाँच  (bare fraction -> शून्य)
+  - 0.5        -> शून्य प्वाइन्ट पाँच  (leading zero accepted)
+  - -१५ (deva)-> माइनस पन्ध्र          (Devanagari digits + minus)
 """
 import sys, os
 
@@ -49,6 +54,33 @@ def main():
                         ["बाह्र", "दशमलव", "पाँच"]) else 1
     fails += 0 if check("१२.५ (deva)", N.verbalize_decimal("१२.५"),
                         ["बाह्र", "प्वाइन्ट", "पाँच"]) else 1
+
+    # ---- edge cases: minus, separators, bare/zero fractions ----
+    print("\n=== (Numbers) edge cases ===")
+    fails += 0 if check("-15", N.verbalize_digit_run("-15"),
+                        ["माइनस", "पन्ध्र"]) else 1
+    fails += 0 if check("1,50,000", N.verbalize_digit_run("1,50,000"),
+                        ["एक", "लाख", "पचास", "हजार"]) else 1
+    fails += 0 if check(".5", N.verbalize_digit_run(".5"),
+                        ["शून्य", "प्वाइन्ट", "पाँच"]) else 1
+    fails += 0 if check("0.5", N.verbalize_digit_run("0.5"),
+                        ["शून्य", "प्वाइन्ट", "पाँच"]) else 1
+    fails += 0 if check("-१५ (deva)", N.verbalize_digit_run("-१५"),
+                        ["माइनस", "पन्ध्र"]) else 1
+
+    # text-level: minus and separators survive full sentence normalization
+    txt2 = N.normalize_numbers_in_text("तल 1,50,000 मानिस थिए। -15 डिग्री")
+    ok = txt2 == "तल एक लाख पचास हजार मानिस थिए। माइनस पन्ध्र डिग्री"
+    print("  %-22s -> %s   %s" % ("normalize sentence", txt2, "OK" if ok else "FAIL"))
+    fails += 0 if ok else 1
+
+    # tokenizer: minus expands into माइनस + digit word
+    toks2 = T.tokenize_with_numbers("तापमान -15 डिग्री")
+    kinds2 = [(t["surface"], t["kind"]) for t in toks2]
+    ok = kinds2 == [("तापमान", "devanagari"), ("माइनस", "devanagari"),
+                    ("पन्ध्र", "devanagari"), ("डिग्री", "devanagari")]
+    print("  %-22s -> %s   %s" % ("tokenize -15", kinds2, "OK" if ok else "FAIL"))
+    fails += 0 if ok else 1
 
     # text-level date-context grouping
     txt = N.normalize_numbers_in_text("1990साल")

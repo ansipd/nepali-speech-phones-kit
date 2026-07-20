@@ -172,8 +172,49 @@ DEVA_DIGIT_TO_INT = {
     "५": 5, "६": 6, "७": 7, "८": 8, "९": 9,
 }
 
-# Matches a pure digit run (Devanagari or ASCII), optionally with one ".".
-_DIGIT_RE = re.compile(r"[०-९0-9]+(?:\.[०-९0-9]+)?")
+# Matches a numeric run (Devanagari or ASCII digits) that may contain
+# grouping separators (commas, Devanagari commas U+0964/U+0965) and an
+# optional single decimal point, and an optional leading minus sign.
+# clean_numeric() strips separators and turns a leading minus into माइनस.
+# e.g. "-15", "1,50,000", "१,५०,०००.५" match as one run.
+_DIGIT_RE = re.compile(
+    r"-?[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*(?:\.[०-९0-9]+)?"
+)
+
+# Thousand-separators / grouping marks to strip before parsing. Nepali uses
+# the lakh/crore comma system (1,50,000) which must be removed so the math
+# sees the bare integer. Covers ASCII comma, Devanagari comma (०-पूर्णविराम
+# U+0964 / U+0965), and NBSP.
+_SEP_CHARS = {" ", ",", "\u0964", "\u0965", "\u00a0", "\u2009", "_"}
+_SIGN_WORD = "माइनस"  # Nepali for "minus" (negative numbers)
+
+
+def clean_numeric(s):
+    """Normalize a raw numeric token for parsing.
+
+    - strips grouping separators (commas, Devanagari commas, spaces, NBSP)
+    - extracts a leading '-' (or Unicode minus) sign -> returns (neg, digits)
+    - normalizes a bare fraction ".5" -> "0.5" (so the integer part is शून्य)
+
+    Returns (is_negative, cleaned_string) where cleaned_string is a bare
+    digit run with optional single dot, or (False, "") if nothing parseable.
+    """
+    if not s:
+        return False, ""
+    s = s.strip()
+    neg = False
+    # Unicode minus signs and ASCII hyphen/minus
+    if s[0] in ("-", "\u2212", "\u2013", "\u2014"):
+        neg = True
+        s = s[1:].strip()
+    # strip separators
+    s = "".join(ch for ch in s if ch not in _SEP_CHARS)
+    if not s:
+        return neg, ""
+    # bare fraction -> 0.<frac>
+    if s.startswith("."):
+        s = "0" + s
+    return neg, s
 
 
 # ---------------------------------------------------------------------------
@@ -263,26 +304,34 @@ def _cardinal_with_year_rule(n, is_date):
 def verbalize_int(s, is_date=False):
     """Verbalize a single integer digit string (Devanagari or ASCII).
 
-    `is_date`: when True and the value is in 1100-1999, groups by hundreds
-    (year-style). Returns a list of Devanagari word tokens, or [] if `s`
-    is not a pure integer digit string.
+    Handles separators (commas), a leading minus (-> माइनस), and Devanagari
+    digits. `is_date`: when True and the value is in 1100-1999, groups by
+    hundreds (year-style). Returns a list of Devanagari word tokens, or []
+    if `s` is not a parseable integer.
     """
-    n = parse_int(s)
+    neg, cleaned = clean_numeric(s)
+    n = parse_int(cleaned)
     if n is None:
         return []
-    return _cardinal_with_year_rule(n, is_date)
+    out = _cardinal_with_year_rule(n, is_date)
+    if neg:
+        out = [_SIGN_WORD] + out
+    return out
 
 
 def verbalize_decimal(s, formal=False):
     """Verbalize a decimal digit string "INT.FRAC" (Devanagari or ASCII).
 
+    Handles separators, leading minus, and a bare fraction (".5" -> शून्य).
     Integer part: normal cardinal. Fractional digits: read ONE BY ONE.
     Separator: "प्वाइन्ट" (modern, default) or "दशमलव" (formal=True).
     Returns list of Devanagari word tokens, or [] on parse failure.
     """
-    if "." not in s:
-        return verbalize_int(s)
-    int_part, frac_part = s.split(".", 1)
+    neg, cleaned = clean_numeric(s)
+    if "." not in cleaned:
+        return verbalize_int(cleaned, is_date=False) if not neg else \
+            [_SIGN_WORD] + verbalize_int(cleaned, is_date=False)
+    int_part, frac_part = cleaned.split(".", 1)
     n_int = parse_int(int_part)
     if n_int is None:
         return []
@@ -292,6 +341,8 @@ def verbalize_decimal(s, formal=False):
     for ch in frac_part:
         d = parse_digit_char(ch)
         out.append(CARDINALS_0_99[d])
+    if neg:
+        out = [_SIGN_WORD] + out
     return out
 
 
@@ -300,7 +351,8 @@ def verbalize_digit_run(s, is_date=False, formal=False):
 
     Returns list of Devanagari word tokens (may be empty if unparseable).
     """
-    if "." in s:
+    neg, cleaned = clean_numeric(s)
+    if "." in cleaned:
         return verbalize_decimal(s, formal=formal)
     return verbalize_int(s, is_date=is_date)
 
@@ -332,6 +384,11 @@ def normalize_numbers_in_text(text, formal=False):
         if not words:
             return run
         out = " ".join(words)
+        # Leading sign (e.g. "-15"): the regex does not consume the sign, so
+        # prepend the Nepali word "माइनस" and a space.
+        start = match.start()
+        if start > 0 and text[start - 1] in ("-", "\u2212", "\u2013", "\u2014"):
+            out = _SIGN_WORD + " " + out
         # If the next char is a letter (not space/punct), the original text
         # had the keyword glued to the number (e.g. "1990साल"). Insert a
         # space so the downstream whitespace tokenizer keeps the keyword as
