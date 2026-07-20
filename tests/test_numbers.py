@@ -10,14 +10,14 @@ Native-validated expectations:
   - 2026        -> दुई हजार छब्बिस   (year == count; no "बिस सय" form)
   - 1990        -> एक हजार नौ सय नब्बे  (standard math, no context)
   - 1990साल     -> उन्नाइस सय नब्बे साल (date context -> grouped by hundreds)
-  - 12.5        -> बाह्र प्वाइन्ट पाँच  (modern point word)
-  - 12.55       -> बाह्र प्वाइन्ट पाँच पाँच (fractional digits read individually)
+  - 12.5        -> बाह्र पोइन्ट पाँच  (modern point word)
+  - 12.55       -> बाह्र पोइन्ट पाँच पाँच (fractional digits read individually)
   - 12.5 formal -> बाह्र दशमलव पाँच  (formal separator)
   - Devanagari digits १२.५ behave identically to ASCII 12.5
   - -15        -> माइनस पन्ध्र          (leading minus sign)
   - 1,50,000   -> एक लाख पचास हजार    (grouping separators consumed)
-  - .5         -> शून्य प्वाइन्ट पाँच  (bare fraction -> शून्य)
-  - 0.5        -> शून्य प्वाइन्ट पाँच  (leading zero accepted)
+  - .5         -> शून्य पोइन्ट पाँच  (bare fraction -> शून्य)
+  - 0.5        -> शून्य पोइन्ट पाँच  (leading zero accepted)
   - -१५ (deva)-> माइनस पन्ध्र          (Devanagari digits + minus)
 """
 import sys, os
@@ -47,13 +47,13 @@ def main():
     fails += 0 if check("1990 (date)", N.verbalize_int("1990", is_date=True),
                         ["उन्नाइस", "सय", "नब्बे"]) else 1
     fails += 0 if check("12.5", N.verbalize_decimal("12.5"),
-                        ["बाह्र", "प्वाइन्ट", "पाँच"]) else 1
+                        ["बाह्र", "पोइन्ट", "पाँच"]) else 1
     fails += 0 if check("12.55", N.verbalize_decimal("12.55"),
-                        ["बाह्र", "प्वाइन्ट", "पाँच", "पाँच"]) else 1
+                        ["बाह्र", "पोइन्ट", "पाँच", "पाँच"]) else 1
     fails += 0 if check("12.5 formal", N.verbalize_decimal("12.5", formal=True),
                         ["बाह्र", "दशमलव", "पाँच"]) else 1
     fails += 0 if check("१२.५ (deva)", N.verbalize_decimal("१२.५"),
-                        ["बाह्र", "प्वाइन्ट", "पाँच"]) else 1
+                        ["बाह्र", "पोइन्ट", "पाँच"]) else 1
 
     # ---- edge cases: minus, separators, bare/zero fractions ----
     print("\n=== (Numbers) edge cases ===")
@@ -62,9 +62,9 @@ def main():
     fails += 0 if check("1,50,000", N.verbalize_digit_run("1,50,000"),
                         ["एक", "लाख", "पचास", "हजार"]) else 1
     fails += 0 if check(".5", N.verbalize_digit_run(".5"),
-                        ["शून्य", "प्वाइन्ट", "पाँच"]) else 1
+                        ["शून्य", "पोइन्ट", "पाँच"]) else 1
     fails += 0 if check("0.5", N.verbalize_digit_run("0.5"),
-                        ["शून्य", "प्वाइन्ट", "पाँच"]) else 1
+                        ["शून्य", "पोइन्ट", "पाँच"]) else 1
     fails += 0 if check("-१५ (deva)", N.verbalize_digit_run("-१५"),
                         ["माइनस", "पन्ध्र"]) else 1
 
@@ -93,7 +93,7 @@ def main():
     kinds = [(t["surface"], t["kind"]) for t in toks]
     expected_kinds = [("दुई", "devanagari"), ("हजार", "devanagari"),
                       ("छब्बिस", "devanagari"), ("साल", "devanagari"),
-                      ("बाह्र", "devanagari"), ("प्वाइन्ट", "devanagari"),
+                      ("बाह्र", "devanagari"), ("पोइन्ट", "devanagari"),
                       ("पाँच", "devanagari")]
     ok = kinds == expected_kinds
     print("  %-22s -> %s   %s" % ("tokenize_with_numbers", kinds, "OK" if ok else "FAIL"))

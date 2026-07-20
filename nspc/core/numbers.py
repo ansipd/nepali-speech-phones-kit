@@ -27,8 +27,8 @@ Design notes (per NSPC-Kit methodology: rule-based, native-ear authority):
    ("उन्नाइस सय नब्बे"); otherwise standard math ("एक हजार नौ सय नब्बे").
 
 3. Decimals (trigger on "."): integer part verbalized normally; fractional
-   digits read ONE BY ONE (12.55 -> "बाह्र प्वाइन्ट पाँच पाँच", NOT grouped).
-   Default separator is the English loanword "प्वाइन्ट" (modern spoken Nepali);
+    digits read ONE BY ONE (12.55 -> "बाह्र पोइन्ट पाँच पाँच", NOT grouped).
+    Default separator is the English loanword "पोइन्ट" (modern spoken Nepali);
    pass formal=True to use the formal "दशमलव" for news/official text.
 
 4. Phonology integration: output is Devanagari word tokens only. The caller
@@ -164,7 +164,7 @@ CRORE = "करोड"
 _DATE_KEYWORDS = {"साल", "वर्ष", "सम्म", "को"}
 
 # Decimal separator word(s).
-_POINT_MODERN = "प्वाइन्ट"
+_POINT_MODERN = "पोइन्ट"
 _POINT_FORMAL = "दशमलव"
 
 DEVA_DIGIT_TO_INT = {
@@ -324,7 +324,7 @@ def verbalize_decimal(s, formal=False):
 
     Handles separators, leading minus, and a bare fraction (".5" -> शून्य).
     Integer part: normal cardinal. Fractional digits: read ONE BY ONE.
-    Separator: "प्वाइन्ट" (modern, default) or "दशमलव" (formal=True).
+    Separator: "पोइन्ट" (modern, default) or "दशमलव" (formal=True).
     Returns list of Devanagari word tokens, or [] on parse failure.
     """
     neg, cleaned = clean_numeric(s)

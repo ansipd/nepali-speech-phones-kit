@@ -484,8 +484,8 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
      for 1100-1999: if immediately followed by a date keyword (साल/वर्ष/सम्म/को)
      group by hundreds (`१९९०`->`उन्नाइस सय नब्बे`); else standard math.
   3. **Decimals** (trigger "."): integer normal, fractional digits read ONE
-     BY ONE (`12.55`->`बाह्र प्वाइन्ट पाँच पाँच`). Default separator is the
-     modern loanword `प्वाइन्ट`; `formal=True` falls back to `दशमलव`.
+     BY ONE (`12.55`->`बाह्र पोइन्ट पाँच पाँच`). Default separator is the
+     modern loanword `पोइन्ट`; `formal=True` falls back to `दशमलव`.
   4. **Phonology integration**: module outputs Devanagari WORD tokens only;
      caller feeds each through existing G2P (Ohala + R7). No engine changes.
 
