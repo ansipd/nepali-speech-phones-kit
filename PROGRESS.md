@@ -569,11 +569,17 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
   2. **Tier 1 (whitelist)**: hardcoded lookup of common loanwords whose dynamic
      transliteration is unreliable (`facebook`->`फेसबुक`, `station`->`स्टेसन`,
      `hello`->`हेलो`, etc.). Forms verified against native-speaker ear.
-  3. **Tier 2 (dynamic)**: if not whitelisted, use AI4Bharat IndicXlit (Nepali
-     "ne") when the OPTIONAL `indicxlit` dependency is installed; else fall back
-     to a lightweight offline rule-based Roman->Devanagari mapper. The ML path
-     is optional (no hard dependency) so the engine stays self-contained and
-     testable offline; native ear remains the authority, not the library.
+  3. **Tier 2 (OFFLINE rule mapper — the implemented path)**: if not whitelisted,
+     convert via the built-in lightweight rule-based Roman->Devanagari mapper
+     (Indic-phonetic approximation). Works with NO external dependency — fully
+     offline and testable. This is what v0 ships with.
+  4. **IndicXlit (AI4Bharat, Nepali "ne") — NOT IMPLEMENTED in v0**: an optional
+     smarter Tier 2 backend for unknown words. It is a future upgrade only; the
+     library is NOT a dependency and is NOT required. A no-op hook
+     (`_indicxlit_transliterate`) exists and activates automatically if someone
+     runs `pip install indicxlit`, but it has NOT been validated against the
+     native ear and is not part of the v0 deliverable. Offline rule mapper is
+     the default and sufficient for common loanwords.
   4. **Integration**: added `normalize_text_pipeline()` = mixed_script first,
      then `expand_numbers()`; also applied at the start of `tokenize_with_numbers()`
      so Roman tokens become `devanagari` kind before G2P.
@@ -594,8 +600,36 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
 
   **Status**: all 8 suites GREEN. Committed + pushed. This is a completeness/
   robustness add-on (handles real mixed input); the pure-Nepali core was already
-  complete. Optional ML transliteration (indicxlit) can be enabled later without
-  code changes (pip install indicxlit).
+  complete. v0 ships the OFFLINE path (whitelist + rule mapper) only. IndicXlit
+  (AI4Bharat "ne") is a NOT-IMPLEMENTED optional future upgrade — the hook exists
+  but is inactive unless `pip install indicxlit` is run, and it has NOT been
+  validated against the native ear. No code change needed to enable it later.
+
+---
+
+## HANDOFF / NEXT SESSION (2026-07-20 end of day)
+
+  **What is DONE (all committed + pushed, branch `main`):**
+  - Nepali G2P Standard v1.0 core: Ohala schwa, R7 joins, nasal ँ/ं split,
+    lexicon pruned to 8 genuine irregularities. 6 original suites GREEN.
+  - Number module: cardinals, year==count, decimals (पोइन्ट), minus (माइनस),
+    grouping separators, bare/zero fractions, mobile-number fallback,
+    fractions (a/b -> a बाइ b), percentages (N% -> N प्रतिशत).
+  - Mixed-script preprocessing: Roman->Devanagari (whitelist + offline rule
+    mapper) wired as step 1 of normalize_text_pipeline() and tokenize_with_numbers().
+  - Total: 8 test suites GREEN. No uncommitted changes.
+
+  **Deliberately OUT OF SCOPE (by design, not bugs):**
+  - Ordinals: Nepali writes them as full Devanagari words (पहिलो, दोस्रो,
+    पाँचौँ...); G2P/lexicon already handle them. No ordinal table needed.
+  - Currency (रुपैयाँ): already works as a plain noun before a number.
+  - IndicXlit ML transliteration: future optional upgrade, not in v0.
+
+  **Possible next steps (when resumed):**
+  - Grow the mixed-script WHITELIST as the native ear flags more loanwords.
+  - Optionally validate + enable IndicXlit ("ne") for unknown-word quality.
+  - Improve the offline rule mapper for better coverage of rare loanwords.
+  - Begin TTS integration (adapters/piper, matcha) — see docs/TTS_INTEGRATION_PLAN.md.
 
 
 

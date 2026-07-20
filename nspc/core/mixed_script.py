@@ -14,11 +14,17 @@ tokens would otherwise break word segmentation / the acoustic model.
 DESIGN (two-tier, additive — does NOT touch the pure-Nepali core):
   Tier 1 (whitelist): a hardcoded lookup of common English loanwords whose
           dynamic transliteration is unreliable. Checked first.
-  Tier 2 (dynamic):   if not whitelisted, convert via an open-source
-          transliteration library when available (AI4Bharat IndicXlit, Nepali
-          "ne" code), else a lightweight rule-based Roman->Devanagari mapper.
-          The rule-based fallback keeps the engine self-contained and testable
-          offline; the ML path is OPTIONAL (not a hard dependency).
+  Tier 2 (offline rule mapper): if not whitelisted, convert via a built-in
+          lightweight rule-based Roman->Devanagari mapper (Indic-phonetic
+          approximation). This is the IMPLEMENTED path and works with NO
+          external dependencies — fully offline and testable.
+
+  FUTURE OPTIONAL UPGRADE (NOT implemented in v0): when the optional
+          AI4Bharat IndicXlit library (Nepali "ne" code) is installed, it can
+          be used as a smarter Tier 2 backend for unknown words. It is NOT a
+          dependency and is NOT required; the offline rule mapper is the
+          default. See _indicxlit_transliterate() (a no-op hook until enabled
+          via `pip install indicxlit`).
 
 Native-speaker ear (TTS listening) is the authority for the whitelist forms,
 not the library's guess.
