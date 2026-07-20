@@ -14,9 +14,13 @@ frontend can route each token correctly (native / foreign / number).
 """
 import re
 
+from . import numbers as _numbers
+
 DEVANAGARI_RUN = re.compile(r"[\u0900-\u097f]+")
 LATIN_RUN = re.compile(r"[A-Za-z]+")
 DIGIT_RUN = re.compile(r"[0-9]+")
+# Digit run incl. Devanagari digits and an optional decimal point.
+NUM_RUN = re.compile(r"[०-९0-9]+(?:\.[०-९0-9]+)?")
 PUNCT = set("।,;.!?\"'()[]{}:/-")
 
 # Common Latin-in-Nepali loanwords (transliteration path, not letter-fallback)
@@ -49,6 +53,39 @@ def tokenize(text):
         else:
             # mixed; emit as-is, kind 'other'
             tokens.append({"surface": stripped, "kind": "other"})
+    return tokens
+
+
+def expand_numbers(text, formal=False):
+    """Return `text` with every digit run replaced by its Nepali word form
+    (via nspc.core.numbers). Non-digit content is preserved verbatim.
+    This is the text-normalization step that turns numerals into spelled-out
+    Devanagari words BEFORE word-level G2P."""
+    return _numbers.normalize_numbers_in_text(text, formal=formal)
+
+
+def tokenize_with_numbers(text, formal=False):
+    """Tokenize `text` and expand any digit token into Devanagari WORD
+    tokens (so the downstream G2P sees real words, not bare digits).
+
+    Returns a list of {surface, kind} dicts. Digit runs become one or more
+    'devanagari' word tokens; date-context grouping (1100-1999) is applied
+    when a run is immediately followed by a date keyword (साल/वर्ष/सम्म/को).
+    """
+    tokens = []
+    for chunk in text.split():
+        stripped = chunk.strip("".join(PUNCT))
+        if not stripped:
+            continue
+        # expand digit runs inside the chunk, then classify each resulting word
+        expanded = _numbers.normalize_numbers_in_text(stripped, formal=formal)
+        for word in expanded.split():
+            if DEVANAGARI_RUN.fullmatch(word):
+                tokens.append({"surface": word, "kind": "devanagari"})
+            elif LATIN_RUN.fullmatch(word):
+                tokens.append({"surface": word, "kind": "latin"})
+            else:
+                tokens.append({"surface": word, "kind": "other"})
     return tokens
 
 

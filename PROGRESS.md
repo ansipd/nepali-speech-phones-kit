@@ -464,5 +464,48 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
 
   **NOT committed/pushed** (per project policy).
 
+### 5j. NUMBER VERBALIZATION MODULE (2026-07-20)
+
+  **Gap**: the kit had NO number-to-word ability. `normalize_text.py` only
+  tagged digit runs `kind:"digit"` and passed them through; `१` never became
+  `एक`, `2026` never became a word. Required for TTS (numbers are common).
+
+  **Design (user + Gemini, native-ear authority)**: adapted the Ampixa
+  `nepa-newa-text-frontend` `numbers.py` logic (MIT licensed — credited in our
+  file) with linguistic corrections for modern spoken Nepali:
+  1. **Base cardinals 0-99** (idiosyncratic lookup) + compositional
+     सय/हजार/लाख/करोड — ported from Ampixa. Parser handles Devanagari (०-९)
+     and ASCII (0-9) digits identically.
+  2. **Year vs count**: in modern Nepali the year 2026 and count 2,026 are
+     pronounced identically -> `दुई हजार छब्बिस`. Standard thousand/lakh math
+     for ALL numbers >= 2000; NEVER `बिस सय छब्बीस`. Optional context rule
+     for 1100-1999: if immediately followed by a date keyword (साल/वर्ष/सम्म/को)
+     group by hundreds (`१९९०`->`उन्नाइस सय नब्बे`); else standard math.
+  3. **Decimals** (trigger "."): integer normal, fractional digits read ONE
+     BY ONE (`12.55`->`बाह्र प्वाइन्ट पाँच पाँच`). Default separator is the
+     modern loanword `प्वाइन्ट`; `formal=True` falls back to `दशमलव`.
+  4. **Phonology integration**: module outputs Devanagari WORD tokens only;
+     caller feeds each through existing G2P (Ohala + R7). No engine changes.
+
+  **Files added/changed**:
+  - `nspc/core/numbers.py` (NEW — cardinal/decimal verbalization, MIT-credited).
+  - `nspc/core/normalize_text.py` — added `expand_numbers()` and
+    `tokenize_with_numbers()` (digit runs -> devanagari word tokens, routed
+    through existing G2P downstream).
+  - `tests/test_numbers.py` (NEW — 7 cases + text/tokenizer integration).
+
+  **Verified**:
+  - `१`/`1` -> एक; `2026` -> दुई हजार छब्बिस (year==count).
+  - `1990` -> एक हजार नौ सय नब्बे; `1990साल` -> उन्नाइस सय नब्बे साल (grouped).
+  - `12.5` -> बाह्र प्वाइन्ट पाँच; `12.55` -> बाह्र प्वाइन्ट पाँच पाँच (digits
+    individually); `12.5` formal -> बाह्र दशमलव पाँच.
+  - End-to-end: `tokenize_with_numbers` splits numbers into devanagari word
+    tokens; each flows through `lx.process` correctly.
+
+  **Status**: all 7 suites GREEN (added test_numbers). NOT committed/pushed
+  (per project policy). Out of scope for v0: ordinals, currency (रुपैयाँ),
+  percentages, fractions (१/२).
+
+
 
 
