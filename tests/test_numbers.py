@@ -22,6 +22,8 @@ Native-validated expectations:
   - 9849658494 / ९८४९६५८४९४ -> नौ आठ चार नौ छ पाँच आठ चार नौ चार
     (10-digit run starting with 9 -> mobile number, read digit-by-digit;
      bypasses all thousand/lakh/crore math)
+  - १/२ / 1/2   -> एक बाइ दुई        (fraction: "a बाइ b", modern spoken)
+  - 50% / ५०%    -> पचास प्रतिशत     (percentage symbol -> प्रतिशत)
 """
 import sys, os
 
@@ -80,6 +82,20 @@ def main():
     not_mob = N.verbalize_digit_run("1234567890")
     ok = not_mob != ["एक", "दुई", "तीन", "चार", "पाँच", "छ", "सात", "आठ", "नौ", "शून्य"]
     print("  %-22s -> NOT digit-by-digit: %s   %s" % ("1234567890", ok, "OK" if ok else "FAIL"))
+    fails += 0 if ok else 1
+
+    # ---- fractions and percentages ----
+    print("\n=== (Numbers) fractions / percentages ===")
+    fails += 0 if check("१/२", N.verbalize_fraction("१/२"),
+                        ["एक", "बाइ", "दुई"]) else 1
+    fails += 0 if check("1/2", N.verbalize_fraction("1/2"),
+                        ["एक", "बाइ", "दुई"]) else 1
+    fails += 0 if check("३/४", N.verbalize_fraction("३/४"),
+                        ["तीन", "बाइ", "चार"]) else 1
+    # text-level
+    fr = N.normalize_numbers_in_text("ब्याज 5% र १/२ भाग")
+    ok = fr == "ब्याज पाँच प्रतिशत र एक बाइ दुई भाग"
+    print("  %-22s -> %s   %s" % ("normalize frac/percent", fr, "OK" if ok else "FAIL"))
     fails += 0 if ok else 1
 
     # text-level: minus and separators survive full sentence normalization

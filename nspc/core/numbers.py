@@ -36,7 +36,14 @@ Design notes (per NSPC-Kit methodology: rule-based, native-ear authority):
   5. Mobile-number fallback: a 10-digit run starting with 9 (ASCII) or ९
      (Devanagari) is read digit-by-digit (e.g. 9849658494 -> नौ आठ चार नौ छ
      पाँच आठ चार नौ चार), bypassing all compositional math.
-   no changes needed to the pronunciation engine.
+  6. Fractions ("a/b"): read as "a बाइ b" (modern spoken Nepali), e.g. १/२ ->
+     एक बाइ दुई. Both sides use the normal number rules.
+  7. Percentages ("N%"): the "%" is consumed and replaced by "प्रतिशत", e.g.
+     50% -> पचास प्रतिशत.
+  Ordinals are NOT generated from digits: Nepali writes ordinals as full
+  Devanagari words (पहिलो, दोस्रो, पाँचौँ...), which the G2P/lexicon already
+  handle, so no ordinal table is needed in the number module.
+  No changes needed to the pronunciation engine.
 
 Not yet covered (out of scope for v0): ordinals, currency (रुपैयाँ),
 percentages, fractions (१/२). Can be added as separate functions later.
@@ -170,6 +177,10 @@ _DATE_KEYWORDS = {"साल", "वर्ष", "सम्म", "को"}
 _POINT_MODERN = "पोइन्ट"
 _POINT_FORMAL = "दशमलव"
 
+# Fraction "by" word and percentage word (modern spoken Nepali).
+_FRACTION_BY = "बाइ"      # "a/b" -> "a बाइ b"  (e.g. १/२ -> एक बाइ दुई)
+_PERCENT_WORD = "प्रतिशत"  # "50%" -> "पचास प्रतिशत"
+
 DEVA_DIGIT_TO_INT = {
     "०": 0, "१": 1, "२": 2, "३": 3, "४": 4,
     "५": 5, "६": 6, "७": 7, "८": 8, "९": 9,
@@ -179,9 +190,17 @@ DEVA_DIGIT_TO_INT = {
 # grouping separators (commas, Devanagari commas U+0964/U+0965) and an
 # optional single decimal point, and an optional leading minus sign.
 # clean_numeric() strips separators and turns a leading minus into माइनस.
-# e.g. "-15", "1,50,000", "१,५०,०००.५" match as one run.
+# e.g. "-15", "1,50,000", "१,५०,०००.५" match as one run. A trailing "%"
+# is consumed so the percentage word can be appended (see repl()).
 _DIGIT_RE = re.compile(
-    r"-?[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*(?:\.[०-९0-9]+)?"
+    r"-?[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*(?:\.[०-९0-9]+)?%?"
+)
+
+# Fraction "a/b": two integer runs joined by a solidus. Consumed as a whole so
+# the number module reads both sides (e.g. "१/२" -> "एक बाइ दुई"). A fraction
+# run is matched and substituted BEFORE the plain digit run below.
+_FRACTION_RE = re.compile(
+    r"-?[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*/-?[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*"
 )
 
 # Thousand-separators / grouping marks to strip before parsing. Nepali uses
@@ -390,6 +409,23 @@ def verbalize_digit_run(s, is_date=False, formal=False):
     return verbalize_int(s, is_date=is_date)
 
 
+def verbalize_fraction(s, formal=False):
+    """Verbalize a fraction "A/B" (Devanagari or ASCII digits) as
+    "A बाइ B" (modern spoken Nepali, e.g. १/२ -> एक बाइ दुई). Each side is
+    verbalized with the normal number rules (compositional math, mobile
+    fallback, etc.). Returns [] if `s` is not a fraction shape.
+    """
+    if "/" not in s:
+        return []
+    left, right = s.split("/", 1)
+    lw = verbalize_digit_run(left, formal=formal)
+    rw = verbalize_digit_run(right, formal=formal)
+    if not lw or not rw:
+        return []
+    return lw + [_FRACTION_BY] + rw
+
+
+
 def normalize_numbers_in_text(text, formal=False):
     """Replace every digit run (integer or decimal) in `text` with its
     Nepali word form, joined by single spaces. Non-digit content (including
@@ -408,6 +444,11 @@ def normalize_numbers_in_text(text, formal=False):
 
     def repl(match):
         run = match.group(0)
+        # Trailing "%" was consumed by the regex; strip it and append the
+        # percentage word.
+        is_percent = run.endswith("%")
+        if is_percent:
+            run = run[:-1]
         # look at the text right after the run for a date keyword
         # (keywords are multi-char: साल, वर्ष, सम्म, को)
         end = match.end()
@@ -415,7 +456,9 @@ def normalize_numbers_in_text(text, formal=False):
         is_date = any(after.startswith(kw) for kw in _DATE_KEYWORDS)
         words = verbalize_digit_run(run, is_date=is_date, formal=formal)
         if not words:
-            return run
+            return match.group(0)
+        if is_percent:
+            words = words + [_PERCENT_WORD]
         out = " ".join(words)
         # Leading sign (e.g. "-15"): the regex does not consume the sign, so
         # prepend the Nepali word "माइनस" and a space.
@@ -430,4 +473,9 @@ def normalize_numbers_in_text(text, formal=False):
             out = out + " "   # separate last number word from glued keyword
         return out
 
+    # Fractions ("a/b") first, so the "/" is consumed before the plain digit
+    # pass would otherwise split it into two separate numbers.
+    text = _FRACTION_RE.sub(
+        lambda m: " ".join(verbalize_fraction(m.group(0), formal=formal)), text
+    )
     return _DIGIT_RE.sub(repl, text).strip()

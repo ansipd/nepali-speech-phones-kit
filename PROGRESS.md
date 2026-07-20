@@ -495,6 +495,17 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
      are joined by single spaces. e.g. `9849658494` (or `९८४९६५८४९४`) ->
      `नौ आठ चार नौ छ पाँच आठ चार नौ चार`. A 10-digit run NOT starting with 9
      (e.g. `1234567890`) still uses standard compositional math.
+  6. **Fractions ("a/b")**: read as "a बाइ b" (modern spoken Nepali), e.g.
+     `१/२` -> `एक बाइ दुई`, `३/४` -> `तीन बाइ चार`. Both sides use the normal
+     number rules (compositional math / mobile fallback apply per side).
+  7. **Percentages ("N%")**: the "%" is consumed and replaced by `प्रतिशत`,
+     e.g. `50%` -> `पचास प्रतिशत`. (Space-separated "50 %" is NOT handled in
+     v0; real-world usage glues the sign.)
+  8. **Ordinals — explicitly OUT of scope / no code needed**: Nepali NEVER
+     writes ordinals as digits+suffix (no `५औं`). Ordinals are always full
+     Devanagari words (`पहिलो`, `दोस्रो`, `तेस्रो`, `चौथो`, `पाँचौँ`...), which
+     the G2P/lexicon already process. So the number module does not generate
+     ordinals and no ordinal table is required.
 
   **Files added/changed**:
   - `nspc/core/numbers.py` (NEW — cardinal/decimal verbalization, MIT-credited).
@@ -526,10 +537,17 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
     sentence level, e.g. `तल 1,50,000 मानिस थिए। -15 डिग्री`
     -> `तल एक लाख पचास हजार मानिस थिए। माइनस पन्ध्र डिग्री`.
 
+  - Fractions: `१/२` -> `एक बाइ दुई`; `३/४` -> `तीन बाइ चार` (a/b read as a बाइ b).
+  - Percentages: `50%` -> `पचास प्रतिशत` (glued percent sign consumed to प्रतिशत).
+  - Ordinals confirmed OUT of scope (Nepali uses full Devanagari words; no
+    digit-generated ordinals, no ordinal table needed).
+
   **Status**: all 7 suites GREEN (added test_numbers, extended with edge cases
-  + mobile-number fallback). Committed + pushed (number module + edge fixes +
-  point-word fix + mobile fallback). Out of scope for v0: ordinals,
-  currency (रुपैयाँ), percentages, fractions (१/२).
+  + mobile-number fallback + fractions/percentages). Committed + pushed (number
+  module + edge fixes + point-word fix + mobile fallback + fractions/percent).
+  Currency (रुपैयाँ) already works because it is a plain noun preceding a
+  number; ordinals already work as standalone Devanagari words via G2P/lexicon.
+  Remaining out of scope for v0: none.
 
 
 
