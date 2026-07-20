@@ -15,6 +15,7 @@ frontend can route each token correctly (native / foreign / number).
 import re
 
 from . import numbers as _numbers
+from . import mixed_script as _mixed
 
 DEVANAGARI_RUN = re.compile(r"[\u0900-\u097f]+")
 LATIN_RUN = re.compile(r"[A-Za-z]+")
@@ -64,6 +65,17 @@ def expand_numbers(text, formal=False):
     return _numbers.normalize_numbers_in_text(text, formal=formal)
 
 
+def normalize_text_pipeline(text, formal=False):
+    """Canonical sentence-normalization entry point. Runs, in order:
+      1. mixed_script  — Roman -> Devanagari (two-tier: whitelist + dynamic),
+                         so the rest of the pipeline only sees Devanagari/digits.
+      2. expand_numbers — digit runs -> Devanagari word tokens.
+    Returns the normalized Devanagari string ready for word-level G2P.
+    """
+    text = _mixed.normalize_mixed_script(text)
+    return expand_numbers(text, formal=formal)
+
+
 def tokenize_with_numbers(text, formal=False):
     """Tokenize `text` and expand any digit token into Devanagari WORD
     tokens (so the downstream G2P sees real words, not bare digits).
@@ -73,6 +85,9 @@ def tokenize_with_numbers(text, formal=False):
     when a run is immediately followed by a date keyword (साल/वर्ष/सम्म/को).
     """
     tokens = []
+    # Pre-convert any Roman tokens to Devanagari so downstream G2P sees only
+    # Devanagari (and digits). Roman->Devanagari is the first pipeline step.
+    text = _mixed.normalize_mixed_script(text)
     for chunk in text.split():
         stripped = chunk.strip("".join(PUNCT))
         # Preserve a leading minus sign that immediately precedes a digit run

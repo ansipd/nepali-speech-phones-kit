@@ -3,10 +3,13 @@
 **Project**: Deterministic, citable Nepali pronunciation Standard v1.0 + universal
 engine-agnostic G2P frontend for TTS training (no trained voice).
 **Location**: `C:\Users\Sandip Ghimire\nepali-speech-phones-kit\`
-**Status**: All 7 test suites GREEN as of 2026-07-20 (added test_schwa_ohala
-+ test_numbers). Lexicon pruned to 8 genuine irregularities; rule engine now
-authoritative over unreliable seed GT; nasal ँ/ं split regression-locked (R3.4);
-number verbalization module (cardinals, year==count, decimals, minus, separators)
+**Status**: All 8 test suites GREEN as of 2026-07-20 (added test_schwa_ohala
++ test_numbers + test_mixed_script). Lexicon pruned to 8 genuine irregularities;
+rule engine now authoritative over unreliable seed GT; nasal ँ/ं split
+regression-locked (R3.4); number verbalization module (cardinals, year==count,
+decimals, minus, separators, fractions, percentages) + mixed-script Roman to
+Devanagari preprocessing (two-tier: whitelist + optional IndicXlit / offline
+rule fallback) integrated as the first pipeline step.
 added and edge-case hardened.
 
 ---
@@ -548,6 +551,51 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
   Currency (रुपैयाँ) already works because it is a plain noun preceding a
   number; ordinals already work as standalone Devanagari words via G2P/lexicon.
   Remaining out of scope for v0: none.
+
+### 5k. MIXED-SCRIPT (Roman -> Devanagari) PREPROCESSING (2026-07-20)
+
+  **Gap**: real Nepali TTS input is rarely 100% Devanagari — speakers
+  code-switch ("facebook नचलाइ station जाने हो र?"). Roman characters must be
+  converted to Devanagari BEFORE the number module and the Ohala phonology
+  engine, or they break word segmentation / the acoustic model. The core
+  `LOAN_LATIN` table had only 6 entries and everything else was unhandled.
+
+  **Design (agreed with user; architecture adapted from the Hinglish-TTS
+  reference, https://harrrshall.github.io/hinglish-tts/, retargeted to Nepali)**:
+  a two-tier, purely ADDITIVE preprocessing step that does NOT touch the
+  pure-Nepali core (Ohala / R7 / nasal / numbers all unchanged):
+  1. **Detection**: a token containing any ASCII A-Z/a-z is "Roman". Pure
+     Devanagari, digit, or punctuation tokens pass through untouched.
+  2. **Tier 1 (whitelist)**: hardcoded lookup of common loanwords whose dynamic
+     transliteration is unreliable (`facebook`->`फेसबुक`, `station`->`स्टेसन`,
+     `hello`->`हेलो`, etc.). Forms verified against native-speaker ear.
+  3. **Tier 2 (dynamic)**: if not whitelisted, use AI4Bharat IndicXlit (Nepali
+     "ne") when the OPTIONAL `indicxlit` dependency is installed; else fall back
+     to a lightweight offline rule-based Roman->Devanagari mapper. The ML path
+     is optional (no hard dependency) so the engine stays self-contained and
+     testable offline; native ear remains the authority, not the library.
+  4. **Integration**: added `normalize_text_pipeline()` = mixed_script first,
+     then `expand_numbers()`; also applied at the start of `tokenize_with_numbers()`
+     so Roman tokens become `devanagari` kind before G2P.
+
+  **Files added/changed**:
+  - `nspc/core/mixed_script.py` (NEW — two-tier Roman->Devanagari).
+  - `nspc/core/normalize_text.py` — added `normalize_text_pipeline()`; both it
+    and `tokenize_with_numbers()` run mixed_script as step 1.
+  - `tests/test_mixed_script.py` (NEW — 8 checks incl. exact expected output).
+
+  **Verified**:
+  - `facebook नचलाइ station जाने हो र?` -> `फेसबुक नचलाइ स्टेसन जाने हो र?`
+    (exact expected output matches).
+  - Pure Devanagari and digit runs pass through mixed_script untouched.
+  - After full pipeline, all tokens are `devanagari` kind; numbers still expand
+    (`नेपाल 2026 सालमा 50% वृद्धि भयो` -> `नेपाल दुई हजार छब्बिस सालमा पचास प्रतिशत वृद्धि भयो`).
+  - Works offline (indicxlit not installed here): whitelist + rule fallback.
+
+  **Status**: all 8 suites GREEN. Committed + pushed. This is a completeness/
+  robustness add-on (handles real mixed input); the pure-Nepali core was already
+  complete. Optional ML transliteration (indicxlit) can be enabled later without
+  code changes (pip install indicxlit).
 
 
 
