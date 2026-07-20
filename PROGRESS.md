@@ -487,7 +487,14 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
      BY ONE (`12.55`->`बाह्र पोइन्ट पाँच पाँच`). Default separator is the
      modern loanword `पोइन्ट`; `formal=True` falls back to `दशमलव`.
   4. **Phonology integration**: module outputs Devanagari WORD tokens only;
-     caller feeds each through existing G2P (Ohala + R7). No engine changes.
+      caller feeds each through existing G2P (Ohala + R7). No engine changes.
+  5. **Mobile-number fallback**: a digit run that is EXACTLY 10 characters long
+     and starts with `9` (ASCII) or `९` (Devanagari) is classified as a mobile
+     phone number. It bypasses ALL compositional math (thousand/lakh/crore) and
+     0-99 pairing; each digit is mapped to its standalone 0-9 name and the words
+     are joined by single spaces. e.g. `9849658494` (or `९८४९६५८४९४`) ->
+     `नौ आठ चार नौ छ पाँच आठ चार नौ चार`. A 10-digit run NOT starting with 9
+     (e.g. `1234567890`) still uses standard compositional math.
 
   **Files added/changed**:
   - `nspc/core/numbers.py` (NEW — cardinal/decimal verbalization, MIT-credited).
@@ -499,7 +506,7 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
   **Verified**:
   - `१`/`1` -> एक; `2026` -> दुई हजार छब्बिस (year==count).
   - `1990` -> एक हजार नौ सय नब्बे; `1990साल` -> उन्नाइस सय नब्बे साल (grouped).
-  - `12.5` -> बाह्र प्वाइन्ट पाँच; `12.55` -> बाह्र प्वाइन्ट पाँच पाँच (digits
+  - `12.5` -> बाह्र पोइन्ट पाँच; `12.55` -> बाह्र पोइन्ट पाँच पाँच (digits
     individually); `12.5` formal -> बाह्र दशमलव पाँच.
   - End-to-end: `tokenize_with_numbers` splits numbers into devanagari word
     tokens; each flows through `lx.process` correctly.
@@ -511,7 +518,7 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
   - `-15` -> `माइनस पन्ध्र` (previously broken -> `-पन्ध्र`).
   - `1,50,000` -> `एक लाख पचास हजार` (previously broken -> `एक,पचास,शून्य`);
     `_DIGIT_RE` extended to consume separators so the whole run is one match.
-  - `.5` -> `शून्य प्वाइन्ट पाँच` (previously broken -> `.पाँच`); `0.5` already OK.
+  - `.5` -> `शून्य पोइन्ट पाँच` (previously broken -> `.पाँच`); `0.5` already OK.
   - Devanagari-digit minus `-१५` -> `माइनस पन्ध्र`.
   - `tokenize_with_numbers` now preserves a leading minus so it expands into a
     `माइनस` token (previously the tokenizer stripped `-` as punctuation).
@@ -519,8 +526,9 @@ Reviewed each of the 9 remaining curated entries with the native speaker:
     sentence level, e.g. `तल 1,50,000 मानिस थिए। -15 डिग्री`
     -> `तल एक लाख पचास हजार मानिस थिए। माइनस पन्ध्र डिग्री`.
 
-  **Status**: all 7 suites GREEN (added test_numbers, extended with edge cases).
-  Committed + pushed (number module + edge fixes). Out of scope for v0: ordinals,
+  **Status**: all 7 suites GREEN (added test_numbers, extended with edge cases
+  + mobile-number fallback). Committed + pushed (number module + edge fixes +
+  point-word fix + mobile fallback). Out of scope for v0: ordinals,
   currency (रुपैयाँ), percentages, fractions (१/२).
 
 

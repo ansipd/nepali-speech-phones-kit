@@ -31,8 +31,11 @@ Design notes (per NSPC-Kit methodology: rule-based, native-ear authority):
     Default separator is the English loanword "पोइन्ट" (modern spoken Nepali);
    pass formal=True to use the formal "दशमलव" for news/official text.
 
-4. Phonology integration: output is Devanagari word tokens only. The caller
-   feeds each token through the existing engine (lexicon.process / rules.segment);
+  4. Phonology integration: output is Devanagari word tokens only. The caller
+     feeds each token through the existing engine (lexicon.process / rules.segment);
+  5. Mobile-number fallback: a 10-digit run starting with 9 (ASCII) or ९
+     (Devanagari) is read digit-by-digit (e.g. 9849658494 -> नौ आठ चार नौ छ
+     पाँच आठ चार नौ चार), bypassing all compositional math.
    no changes needed to the pronunciation engine.
 
 Not yet covered (out of scope for v0): ordinals, currency (रुपैयाँ),
@@ -187,6 +190,8 @@ _DIGIT_RE = re.compile(
 # U+0964 / U+0965), and NBSP.
 _SEP_CHARS = {" ", ",", "\u0964", "\u0965", "\u00a0", "\u2009", "_"}
 _SIGN_WORD = "माइनस"  # Nepali for "minus" (negative numbers)
+_ASCII_DIGITS = set("0123456789")
+_DEVA_DIGITS = set(DEVA_DIGIT_TO_INT.keys())  # ०१२३४५६७८९
 
 
 def clean_numeric(s):
@@ -346,11 +351,39 @@ def verbalize_decimal(s, formal=False):
     return out
 
 
+def verbalize_mobile(s):
+    """Verbalize a 10-digit mobile phone number string (Devanagari or ASCII).
+
+    Bypasses ALL compositional math (thousand/lakh/crore) and 0-99 pairing.
+    Each digit is mapped to its standalone name from the 0-9 base table and
+    the words are joined by single spaces.
+
+    Detection (caller responsibility): the input must be exactly 10 digit
+    characters starting with '9' (ASCII) or '९' (Devanagari). Returns [] if
+    `s` is not a clean 10-digit run.
+    """
+    digits = [ch for ch in s if ch in _ASCII_DIGITS or ch in _DEVA_DIGITS]
+    if len(digits) != 10 or digits[0] not in ("9", "९"):
+        return []
+    out = []
+    for ch in digits:
+        d = parse_digit_char(ch)
+        out.append(CARDINALS_0_99[d])
+    return out
+
+
 def verbalize_digit_run(s, is_date=False, formal=False):
     """Dispatch on whether `s` contains a decimal point.
 
+    A 10-digit run beginning with '9' (ASCII) or '९' (Devanagari) is treated
+    as a mobile phone number and read digit-by-digit (see verbalize_mobile).
+
     Returns list of Devanagari word tokens (may be empty if unparseable).
     """
+    # Mobile-number fallback: exactly 10 digits, leading 9 / ९.
+    digit_chars = [ch for ch in s if ch in _ASCII_DIGITS or ch in _DEVA_DIGITS]
+    if len(digit_chars) == 10 and digit_chars[0] in ("9", "९"):
+        return verbalize_mobile(s)
     neg, cleaned = clean_numeric(s)
     if "." in cleaned:
         return verbalize_decimal(s, formal=formal)

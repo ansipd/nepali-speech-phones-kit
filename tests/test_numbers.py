@@ -19,6 +19,9 @@ Native-validated expectations:
   - .5         -> शून्य पोइन्ट पाँच  (bare fraction -> शून्य)
   - 0.5        -> शून्य पोइन्ट पाँच  (leading zero accepted)
   - -१५ (deva)-> माइनस पन्ध्र          (Devanagari digits + minus)
+  - 9849658494 / ९८४९६५८४९४ -> नौ आठ चार नौ छ पाँच आठ चार नौ चार
+    (10-digit run starting with 9 -> mobile number, read digit-by-digit;
+     bypasses all thousand/lakh/crore math)
 """
 import sys, os
 
@@ -67,6 +70,17 @@ def main():
                         ["शून्य", "पोइन्ट", "पाँच"]) else 1
     fails += 0 if check("-१५ (deva)", N.verbalize_digit_run("-१५"),
                         ["माइनस", "पन्ध्र"]) else 1
+
+    # ---- mobile phone number fallback (10 digits, leading 9) ----
+    mob = ["नौ", "आठ", "चार", "नौ", "छ", "पाँच", "आठ", "चार", "नौ", "चार"]
+    fails += 0 if check("9849658494", N.verbalize_digit_run("9849658494"), mob) else 1
+    fails += 0 if check("९८४९६५८४९४ (deva)",
+                        N.verbalize_digit_run("९८४९६५८४९४"), mob) else 1
+    # a 10-digit run NOT starting with 9 must NOT be treated as a mobile number
+    not_mob = N.verbalize_digit_run("1234567890")
+    ok = not_mob != ["एक", "दुई", "तीन", "चार", "पाँच", "छ", "सात", "आठ", "नौ", "शून्य"]
+    print("  %-22s -> NOT digit-by-digit: %s   %s" % ("1234567890", ok, "OK" if ok else "FAIL"))
+    fails += 0 if ok else 1
 
     # text-level: minus and separators survive full sentence normalization
     txt2 = N.normalize_numbers_in_text("तल 1,50,000 मानिस थिए। -15 डिग्री")
