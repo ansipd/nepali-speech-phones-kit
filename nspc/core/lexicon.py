@@ -123,8 +123,11 @@ class Lexicon:
             # its validated canonical tokens directly (authoritative).
             "यस":       {"tokens": ["y", "u", "s"], "branch": "C6",
                         "retain": True, "note": "yus (अ→u sound change)"},
-            "सरकार":    {"tokens": ["s", "a", "r", "k", "a", "r"], "branch": "C6",
-                        "retain": True, "note": "sarkar (schwa after स deleted)"},
+            "उसले":      {"tokens": ["u", "s", "l", "e"], "branch": "C6",
+                        "retain": True, "note": "usle (monosyllabic host उस + ले; "
+                        "final अ silent). Productive pronoun+postposition join; "
+                        "re-added after 5f join revert (monosyllabic hosts handled "
+                        "by curated list, not the polysyllabic host_drops path)."},
             "मञ्च":      {"tokens": ["m", "a", "n", "ch"], "branch": "C1",
                         "retain": False, "note": "manch (ञ silent; final अ dropped, speech variant)"},
             "अनलाइन":    {"tokens": ["a", "N", "l", "i", "N"], "branch": "C6",

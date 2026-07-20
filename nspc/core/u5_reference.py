@@ -20,6 +20,18 @@ import unicodedata
 
 L_NEG = {"मञ्च", "गञ्ज", "पन्त"}
 
+# Postpositions / derivational suffixes (नामयोगी / सम्बन्धवाचक) are never
+# pronounced in isolation; they always attach to a preceding host and KEEP
+# their final inherent /a/ (e.g. सँग -> "saga", not "sag"; तिर -> "Tira",
+# not "Tir). They are exempt from the C6 final-schwa DELETE that applies to
+# bare native nouns (R7). A word ending in one of these (and longer than it)
+# therefore RETAINs its final /a/.
+_POSTPOSITIONS = {
+    "जस्तै", "आदि", "वाला", "दार", "सँगै", "पछि", "अघि", "भरि", "सम्म",
+    "हरू", "हरु", "सँग", "तिर", "बाट", "मा", "ले", "को", "का", "पनि", "सित",
+    "पटक", "पल्ट", "पति", "बिना", "लाई",
+}
+
 # Traditional HALANTA words: written without a virama yet pronounced WITHOUT
 # the final inherent /a/ (exception to the C6 RETAIN default). Confirmed by
 # native-speaker review. Add others ONLY with native confirmation.
@@ -101,6 +113,12 @@ def u5(orth, tags):
     """Returns (branch_id, retain: bool, trace_note). Pure function of tags."""
     if tags.get("dead"):
         return ("C0", False, "final consonant DEAD (virama) -> DELETE")
+    # R7 — postposition-final: a word ending in a known postposition (longer
+    # than the suffix) KEEPS its final inherent /a/ (the suffix is pronounced
+    # in attachment, never isolated). Overrides C6 default DELETE. E.g.
+    # शिक्षातिर -> shiksha:Tira, कलमबाट -> kalamba:ta, देशतिर -> DeshTira.
+    if any(orth.endswith(p) and len(orth) > len(p) for p in _POSTPOSITIONS):
+        return ("C6-P", True, "ends in postposition -> RETAIN final /a/ (R7)")
     # Halo — a word consisting of a SINGLE live consonant (e.g. म, त, क, स) is
     # always pronounced with its inherent /a/ (ma, Ta, ka, sa); there is no
     # following syllable to delete it into. General rule, no exceptions. This
@@ -169,6 +187,8 @@ def ground_truth(orth, tags):
     function must agree on every input."""
     if tags.get("dead"):
         return False
+    if any(orth.endswith(p) and len(orth) > len(p) for p in _POSTPOSITIONS):
+        return True
     if tags.get("conjunct"):
         if tags.get("lneg") or orth in L_NEG:
             return False

@@ -154,6 +154,73 @@ def _medial_cluster(c1, c2):
     return False
 
 
+# Liquids / glides as MEDIAL CODAS: in native compounds C1-liquid-V the liquid
+# (र/ल/व/य) is a coda and DROPS its inherent /a/; the vowel belongs to the next
+# consonant. See _ohala_internal_schwa.
+_LIQUID_GLIDE = {"\u0930", "\u0932", "\u0935", "\u092f"}  # र ल व य
+
+
+def _ohala_internal_schwa(cps, i, join_idx=None):
+    """Internal schwa-deletion for native C1-LIQUID-C3-V clusters (Ohala-style).
+
+    A live consonant at position i DROPS its inherent /a/ when it is a
+    liquid/glide (र/ल/व/य) that sits in the MIDDLE of a cluster: it is preceded
+    by a consonant (C1) and followed by another consonant (C3) which itself is
+    followed by a vowel. The liquid is a coda; the vowel is the onset of C3.
+
+    Native-compound (stem + suffix), native-confirmed:
+        सरकार = स र कार -> sarkar   (स keeps /a/, र coda drops, का=long /a:/)
+        तरबार = त र बार -> tarbar   (त keeps, र coda drops)
+        सलवार = स ल वार -> salwar   (स keeps, ल coda drops)
+        तलवार = त ल वार -> talwar   (त keeps, ल coda drops)
+
+    PROTECTED (liquid KEEPS its /a/ -- it is a syllable peak, not a coda):
+        कमल  = क म ल   -> kamal   (ल is word-final -> keeps)
+        करण  = क र ण   -> karan   (ण is word-final -> र keeps)
+        शकिरा = श कि रा -> shakira (र is immediately followed by its OWN matra
+                                 ा -> र is the peak, keeps)
+        बन्द  = ब न् द  -> baNDa   (न is a dead conjunct -> keeps; र not liquid)
+
+    Returns True iff the liquid/glide at position i should suppress its /a/.
+
+    The vowel that licenses the deletion must be IMMEDIATELY after C3 (C3 is
+    itself vowel-bearing: the next token is a matra or independent vowel, with
+    NO other consonant between). This is what separates a true coda
+    (स-र-कार: क is vowel-bearing -> र drops) from an intervening cluster
+    (प-र-म्प-रा: म is followed by प, not a vowel -> र keeps). It also must NOT
+    look past a compound-join boundary (join_idx): a vowel belonging to the
+    SUFFIX must not license deletion of a liquid inside the STEM
+    (क-ल-म-ले: the े is in ले, past the join -> ल keeps -> kalamle).
+    """
+    n = len(cps)
+    if i <= 0 or i >= n - 1:
+        return False
+    # Only applies to consonants INSIDE the stem (before a compound join). A
+    # suffix-initial liquid (e.g. व in वाला) must keep its /a/ as a peak.
+    if join_idx is not None and join_idx >= 0 and i >= join_idx:
+        return False
+    if cps[i] not in _LIQUID_GLIDE:
+        return False
+    # preceding token must be a consonant (C1)
+    if not _is_consonant_base(cps[i - 1]):
+        return False
+    # find C3 = next base consonant after i (skip matras/nasals on the liquid)
+    j = i + 1
+    while j < n and (_is_matra(cps[j]) or cps[j] in (ANUSVARA, CHANDRABINDU)):
+        j += 1
+    if j >= n or not _is_consonant_base(cps[j]):
+        return False  # liquid is immediately followed by its own vowel -> peak
+    # C3 must be IMMEDIATELY vowel-bearing: the very next token after C3 is a
+    # matra / independent vowel (no consonant between). And that vowel must lie
+    # within the same word unit (before any compound join). join_idx < 0 means
+    # no join (whole word), so the boundary restriction does not apply.
+    k = j + 1
+    if k < n and (join_idx < 0 or k < join_idx) and \
+            (_is_matra(cps[k]) or cps[k] in INDEP_VOWEL):
+        return True
+    return False
+
+
 def _is_consonant_base(cp):
     return cp in CONSONANT_BASE
 
@@ -273,14 +340,33 @@ def segment(word, tags=None):
             from .u5_reference import u5 as _u5
             from .normalize import auto_tag as _auto_tag
             _, _host_retain, _ = _u5(host, _auto_tag(host))
-            # The host's final schwa is deleted at the join iff the host,
-            # pronounced STANDALONE, deletes its final schwa (U5 retain=False).
-            # This covers monosyllabic hosts like उस/कस/जस/उन (final स/न drops)
-            # as well as polysyllabic ones (नेपाल/साउन). Hosts that retain their
-            # final अ standalone (म=halo, घर=HALANTA_FINAL deletes so drops too,
-            # यस=RETAIN_FINAL keeps) behave accordingly: मलाई=malai (kept),
-            # यसले=yasale (kept, यस retains), घरलाई=gharlai (घर drops standalone).
-            host_drops_final_a = not _host_retain
+            _host_cons = sum(1 for c in host if _is_consonant_base(c))
+            # Host-final base consonant (skip trailing matras / nasals / virama).
+            _host_final = None
+            for _c in reversed(host):
+                if _is_consonant_base(_c):
+                    _host_final = _c
+                    break
+            # At a compound join the host's final inherent /a/ is deleted UNLESS
+            # the host-final consonant is a liquid/glide, which surfaces as a
+            # syllable PEAK and is retained (नेपाल->Nepa:l, घर->ghar before a
+            # suffix). This generalizes R7: a polysyllabic host drops its final
+            # schwa at the boundary regardless of its standalone U5 decision
+            # (so समाज->sama:j, सिमेन्ट->simenT, पार्क->pa:rk lose their final
+            # /a/ before वाला, while नेपाल/घर keep the liquid peak). Monosyllabic
+            # hosts (उस/कस/...) are handled by the curated list, not here.
+            # At a compound join the host's final inherent /a/ is deleted when
+            # EITHER (a) the host itself deletes its final schwa standalone
+            # (U5 retain=False: HALANTA_FINAL नेपाल/घर, C6 कलम/करण), OR
+            # (b) the host-final consonant is a NON-liquid stop/affricate. A
+            # non-liquid stem-final drops its /a/ before a suffix (पार्क->pa:rk,
+            # समाज->sama:j, सिमेन्ट->simenT all lose the final /a/ before वाला),
+            # while a liquid/glide final surfaces as a syllable PEAK and is
+            # retained (यस->yas before a suffix). Monosyllabic hosts (उस/कस/...)
+            # are handled by the curated list, not here.
+            host_drops_final_a = (_host_cons > 1 or host.endswith(VI_RAMA)) and \
+                ((not _host_retain) or
+                 (_host_final is not None and _host_final not in _LIQUID_GLIDE))
             break
 
     while i < n:
@@ -328,12 +414,9 @@ def segment(word, tags=None):
             is_final = (i == n - 1)
             medial = False
             if not (is_final and not retain) and i != join_idx:
-                # next consonant after this one's inherent /a/ (skip a matra)
-                j = i + 1
-                while j < n and (_is_matra(cps[j]) or cps[j] in (ANUSVARA, CHANDRABINDU)):
-                    j += 1
-                if j < n and _is_consonant_base(cps[j]):
-                    medial = _medial_cluster(cp, cps[j])
+                # Ohala internal schwa deletion: a live consonant followed by a
+                # liquid/glide that begins a new syllable drops its /a/.
+                medial = _ohala_internal_schwa(cps, i, join_idx)
             if (is_final and not retain and not is_postposition) or \
                     (i == join_idx and host_drops_final_a) or medial:
                 pass  # suppress inherent /a/
