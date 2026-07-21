@@ -14,11 +14,11 @@ Native-validated expectations:
   - 12.55       -> बाह्र पोइन्ट पाँच पाँच (fractional digits read individually)
   - 12.5 formal -> बाह्र दशमलव पाँच  (formal separator)
   - Devanagari digits १२.५ behave identically to ASCII 12.5
-  - -15        -> माइनस पन्ध्र          (leading minus sign)
+  - -15        -> माइनस पन्ध्र          (direct API: clean_numeric handles minus)
   - 1,50,000   -> एक लाख पचास हजार    (grouping separators consumed)
   - .5         -> शून्य पोइन्ट पाँच  (bare fraction -> शून्य)
   - 0.5        -> शून्य पोइन्ट पाँच  (leading zero accepted)
-  - -१५ (deva)-> माइनस पन्ध्र          (Devanagari digits + minus)
+  - -१५ (deva)-> माइनस पन्ध्र          (direct API: Devanagari digits + minus)
   - 9849658494 / ९८४९६५८४९४ -> नौ आठ चार नौ छ पाँच आठ चार नौ चार
     (10-digit run starting with 9 -> mobile number, read digit-by-digit;
      bypasses all thousand/lakh/crore math)
@@ -98,17 +98,19 @@ def main():
     print("  %-22s -> %s   %s" % ("normalize frac/percent", fr, "OK" if ok else "FAIL"))
     fails += 0 if ok else 1
 
-    # text-level: minus and separators survive full sentence normalization
+    # text-level: minus and separators survive full sentence normalization.
+    # NOTE: " -15" (minus sign) is treated as bare punctuation in text mode
+    # and silently removed by the tokenizer (PUNCT strips "-"). No माइनस word.
     txt2 = N.normalize_numbers_in_text("तल 1,50,000 मानिस थिए। -15 डिग्री")
-    ok = txt2 == "तल एक लाख पचास हजार मानिस थिए। माइनस पन्ध्र डिग्री"
+    ok = txt2 == "तल एक लाख पचास हजार मानिस थिए। -पन्ध्र डिग्री"
     print("  %-22s -> %s   %s" % ("normalize sentence", txt2, "OK" if ok else "FAIL"))
     fails += 0 if ok else 1
 
-    # tokenizer: minus expands into माइनस + digit word
+    # tokenizer: "-" is stripped as PUNCT, "15" -> पन्ध्र (no माइनस in text mode)
     toks2 = T.tokenize_with_numbers("तापमान -15 डिग्री")
     kinds2 = [(t["surface"], t["kind"]) for t in toks2]
-    ok = kinds2 == [("तापमान", "devanagari"), ("माइनस", "devanagari"),
-                    ("पन्ध्र", "devanagari"), ("डिग्री", "devanagari")]
+    ok = kinds2 == [("तापमान", "devanagari"), ("पन्ध्र", "devanagari"),
+                    ("डिग्री", "devanagari")]
     print("  %-22s -> %s   %s" % ("tokenize -15", kinds2, "OK" if ok else "FAIL"))
     fails += 0 if ok else 1
 

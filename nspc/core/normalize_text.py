@@ -90,11 +90,6 @@ def tokenize_with_numbers(text, formal=False):
     text = _mixed.normalize_mixed_script(text)
     for chunk in text.split():
         stripped = chunk.strip("".join(PUNCT))
-        # Preserve a leading minus sign that immediately precedes a digit run
-        # (e.g. "-15") so the number module can convert it to माइनस. The
-        # generic punctuation strip above would otherwise drop the sign.
-        if chunk and chunk[0] in "-−–—" and stripped and stripped[0] in "०१२३४५६७८९0123456789":
-            stripped = chunk[0] + stripped
         if not stripped:
             continue
         # expand digit runs inside the chunk, then classify each resulting word

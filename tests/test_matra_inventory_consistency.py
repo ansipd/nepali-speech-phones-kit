@@ -30,12 +30,12 @@ EXPECT = [
     ("\u0941", "u",   "SHORT"),  # ु  उ hrasva
     ("\u0942", "u:",  "LONG"),   # ू  ऊ dirgha
     ("\u0947", "e",   "SHORT"),  # े  ए (e)
-    ("\u0948", "e",   "SHORT"),  # ै  ऐ -> e
+    ("\u0948", "ai",  "LONG"),  # ै  ऐ -> ai (diphthong, dirgha-class)
     ("\u094b", "o",   "SHORT"),  # ो  ओ (o)
     ("\u094c", "au",  "LONG"),   # ौ  औ au-kar
 ]
 
-LONG_TOKENS = {"a:", "i:", "u:", "au"}  # au-kar (औ) is dirgha-class/long
+LONG_TOKENS = {"a:", "i:", "u:", "ai", "au"}  # diphthongs ai/au are dirgha-class/long
 
 
 def main():

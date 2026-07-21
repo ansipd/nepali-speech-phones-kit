@@ -135,7 +135,11 @@ class Lexicon:
             "हिँड्न":     {"tokens": ["h", "i~", "d", "n", "u"], "branch": "C0",
                         "retain": True,
                         "note": "hidnu (infinitive न् retained; C0 exception)"},
-            # काठमान्डु -> kathmandu (native spelling मान्डु; न्डु -> ndu)
+            # काठमाडौं -> spoken as काठमान्डौ (nasal shifts from word-end to
+            # before ड: orthography has ं at end, speech has ँ on final vowel)
+            "काठमाडौं": {"tokens": ["k", "a:", "th", "a", "m", "a:", "n", "d", "au~"],
+                         "branch": "C6", "retain": False,
+                         "note": "ka:thama:ndau~ (spoken: nasal before ड + nasalized final au)"},
             "काठमान्डु": {"tokens": ["k", "a", "th", "a", "m", "a", "n", "d", "u"],
                          "branch": "C6", "retain": True,
                          "note": "kathmandu (native spelling काठमान्डु)"},

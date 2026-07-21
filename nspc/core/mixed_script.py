@@ -45,6 +45,9 @@ WHITELIST = {
     "station": "स्टेसन",
     "hello": "हेलो",
     "google": "गुगल",
+    "kathmandu": "काठमाडौं",
+    "nepal": "नेपाल",
+    "pokhara": "पोखरा",
     "whatsapp": "वाट्सएप",
     "youtube": "युट्युब",
     "internet": "इन्टर्नेट",
@@ -211,12 +214,17 @@ def normalize_mixed_script(text):
             trail = inner[-1] + trail
             inner = inner[:-1]
         if _ROMAN_RE.search(inner):
-            # transliterate the inner Roman word(s); keep internal spacing
-            converted = " ".join(
-                transliterate_roman(w) if _ROMAN_RE.search(w) else w
-                for w in inner.split()
-            )
-            out_tokens.append(lead + converted + trail)
+            # Split on internal word separators (dashes, slashes) to handle
+            # compounds like "Kathmandu-5" — only the letter part needs
+            # transliteration; the dash and digit are left for downstream.
+            segs = re.split(r"([-–—/])", inner)
+            converted = []
+            for seg in segs:
+                if _ROMAN_RE.search(seg):
+                    converted.append(transliterate_roman(seg))
+                else:
+                    converted.append(seg)
+            out_tokens.append(lead + "".join(converted) + trail)
         else:
             out_tokens.append(chunk)
     return " ".join(out_tokens)

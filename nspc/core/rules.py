@@ -37,7 +37,7 @@ MATRA_TO_VOWEL = {
     "\u0942": "u:",   # ू  -> u:
     "\u0943": "r~",   # ृ  -> r~ (tatsama)
     "\u0947": "e",    # े  -> e
-    "\u0948": "e",    # ै  -> e  (ai realized as e in Nepali)
+    "\u0948": "ai",   # ै  -> ai (the Sanskrit diphthong ऐ is ai in Nepali)
     "\u094b": "o",    # ो  -> o
     "\u094c": "au",   # ौ  -> au  (au-kar; e.g. सम्झौता -> samjhauta)
 }
@@ -52,7 +52,7 @@ INDEP_VOWEL = {
     "\u090a": "u:",  # ऊ
     "\u090b": "r~",  # ऋ
     "\u090f": "e",   # ए
-    "\u0910": "o",   # ऐ (ai->e handled below; ए is e)
+    "\u0910": "ai",  # ऐ (independent vowel, same as matra ै)
 }
 
 # ---------------------------------------------------------------------------

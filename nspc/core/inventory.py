@@ -32,8 +32,10 @@ VOWELS = {
     "e~",   # एँ
     "o~",   # ओँ
     "r~",   # ऋ (tatsama)
+    "ai",   # ऐ (diphthong; from ै matra and independent ऐ)
     "au",   # औ (au-kar, dirgha diphthong; from ौ matra)
     "a:~",  # आँ (nasalized long a; from ाँ, e.g. माँ, हाँ)
+    "ai~",  # ऐँ (nasalized ai; from ैँ, e.g. कहैँ)
     "au~",  # औँ (nasalized au; from ौँ, e.g. गौं)
 }
 

@@ -40,7 +40,7 @@ def plain(tokens):
 CASES = [
     # --- chandrabindu: vowel nasalization only, no nasal consonant ---
     ("सँग",   "saga",     "ँ -> vowel nasalization (सँ -> sa~)"),
-    ("सँगै",  "sage",     "ँ -> vowel nasalization (सँगै -> sa~gai = sagai)"),
+    ("सँगै",  "sagai",    "ँ -> vowel nasalization (सँगै -> sa~gai = sagai)"),
     # --- anusvara before stops: homorganic nasal consonant ---
     ("संगीत", "sanggi:T", "ं before ग (velar) -> ng"),
     ("संभव",  "sambhaw",  "ं before भ (labial) -> m"),

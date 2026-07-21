@@ -180,6 +180,7 @@ _POINT_FORMAL = "दशमलव"
 # Fraction "by" word and percentage word (modern spoken Nepali).
 _FRACTION_BY = "बाइ"      # "a/b" -> "a बाइ b"  (e.g. १/२ -> एक बाइ दुई)
 _PERCENT_WORD = "प्रतिशत"  # "50%" -> "पचास प्रतिशत"
+_RANGE_WORD = "देखि"      # "A-B" -> "A देखि B"  (e.g. १-५ -> एक देखि पाँच)
 
 DEVA_DIGIT_TO_INT = {
     "०": 0, "१": 1, "२": 2, "३": 3, "४": 4,
@@ -188,12 +189,16 @@ DEVA_DIGIT_TO_INT = {
 
 # Matches a numeric run (Devanagari or ASCII digits) that may contain
 # grouping separators (commas, Devanagari commas U+0964/U+0965) and an
-# optional single decimal point, and an optional leading minus sign.
-# clean_numeric() strips separators and turns a leading minus into माइनस.
-# e.g. "-15", "1,50,000", "१,५०,०००.५" match as one run. A trailing "%"
-# is consumed so the percentage word can be appended (see repl()).
+# optional single decimal point. A trailing "%" is consumed so the
+# percentage word can be appended (see repl()).
+# NOTE: a leading minus sign (-) is deliberately NOT consumed here.
+# In most Nepali TTS text a "-" before a digit is an address separator
+# (Kathmandu-5) or a range dash (handled by _RANGE_DASH_RE), not a negative
+# number. The tokenizer strips "-" as punctuation, so "-5" safely becomes
+# "5" -> "पाँच". The rare case of actual negative numbers should be written
+# explicitly as "माइनस ५" in TTS input.
 _DIGIT_RE = re.compile(
-    r"-?[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*(?:\.[०-९0-9]+)?%?"
+    r"[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*(?:\.[०-९0-9]+)?%?"
 )
 
 # Fraction "a/b": two integer runs joined by a solidus. Consumed as a whole so
@@ -201,6 +206,15 @@ _DIGIT_RE = re.compile(
 # run is matched and substituted BEFORE the plain digit run below.
 _FRACTION_RE = re.compile(
     r"-?[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*/-?[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*"
+)
+
+# Range "A-B": two digit runs joined by a hyphen/en-dash/em-dash. Read as
+# "A देखि B" (from A to B), e.g. "१-५" -> "एक देखि पाँच".
+# A hyphen between two words (योग-ध्यान) is untouched by this digit-specific rule.
+_RANGE_DASH_RE = re.compile(
+    r"[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*"
+    r"[-–—]"
+    r"[०-९0-9]+(?:[,\u0964\u0965]?[०-९0-9]+)*"
 )
 
 # Thousand-separators / grouping marks to strip before parsing. Nepali uses
@@ -425,6 +439,25 @@ def verbalize_fraction(s, formal=False):
     return lw + [_FRACTION_BY] + rw
 
 
+def verbalize_range(s, formal=False):
+    """Verbalize a range "A-B" (Devanagari or ASCII) as "A देखि B", e.g.
+    "१-५" -> "एक देखि पाँच". Returns [] if no range pattern found."""
+    # find the first dash separator (hyphen, en-dash, or em-dash)
+    sep = None
+    for i, ch in enumerate(s):
+        if ch in ("-", "\u2013", "\u2014"):
+            sep = i
+            break
+    if sep is None or sep == 0 or sep == len(s) - 1:
+        return []
+    left = s[:sep]
+    right = s[sep + 1:]
+    lw = verbalize_digit_run(left, formal=formal)
+    rw = verbalize_digit_run(right, formal=formal)
+    if not lw or not rw:
+        return []
+    return lw + [_RANGE_WORD] + rw
+
 
 def normalize_numbers_in_text(text, formal=False):
     """Replace every digit run (integer or decimal) in `text` with its
@@ -460,11 +493,6 @@ def normalize_numbers_in_text(text, formal=False):
         if is_percent:
             words = words + [_PERCENT_WORD]
         out = " ".join(words)
-        # Leading sign (e.g. "-15"): the regex does not consume the sign, so
-        # prepend the Nepali word "माइनस" and a space.
-        start = match.start()
-        if start > 0 and text[start - 1] in ("-", "\u2212", "\u2013", "\u2014"):
-            out = _SIGN_WORD + " " + out
         # If the next char is a letter (not space/punct), the original text
         # had the keyword glued to the number (e.g. "1990साल"). Insert a
         # space so the downstream whitespace tokenizer keeps the keyword as
@@ -478,4 +506,15 @@ def normalize_numbers_in_text(text, formal=False):
     text = _FRACTION_RE.sub(
         lambda m: " ".join(verbalize_fraction(m.group(0), formal=formal)), text
     )
+    # Range dashes ("A-B") second: must run before the plain digit pass so
+    # that "१-५" is not split into two separate digit runs with a stray माइनस.
+    def _range_replacer(m):
+        words = verbalize_range(m.group(0), formal=formal)
+        return " ".join(words) if words else m.group(0)
+    text = _RANGE_DASH_RE.sub(_range_replacer, text)
+    # Separator dashes between a letter and a digit (e.g. काठमाडौ-५,
+    # पोखरा-५, Kathmandu-5) are address/compound connectors that are silent
+    # in speech. Replace with a space so the place name and number remain
+    # separate tokens for the G2P to process independently.
+    text = re.sub(r"(?<=[^\s])[-–—](?=[०-९0-9])", " ", text)
     return _DIGIT_RE.sub(repl, text).strip()
