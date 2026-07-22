@@ -73,41 +73,37 @@ def violates(word, tokens, retain):
     return True
 
 
-FAIL = []
+def test_no_trailing_schwa():
+    FAIL = []
 
-# (1) Explicit critical cases (the class Kala got wrong)
-critical = [
-    "हेरेर", "पर्खेर", "राखेर", "गएर", "हानेर", "फर्केर",
-    "सम्झेर", "ओझेर", "भनेर", "आएर", "गरेर", "खेलेर",
-    "घर", "नेपाल", "विकास", "यस", "को", "मञ्च",
-]
-print("=== (1) CRITICAL WORDS (Kala-bug class) ===")
-lx = _lex.default()
-for w in critical:
-    toks, tags, br, ret, src = lx.process(w)
-    bad = violates(w, toks, ret)
-    if bad:
-        FAIL.append("TRAILING-SCHWA %s: tokens=%s (branch=%s)" % (w, toks, br))
-    print("  %-8s %-8s -> %s %s" % (w, br, " ".join(toks), "BAD" if bad else "ok"))
+    # (1) Explicit critical cases (the class Kala got wrong)
+    critical = [
+        "हेरेर", "पर्खेर", "राखेर", "गएर", "हानेर", "फर्केर",
+        "सम्झेर", "ओझेर", "भनेर", "आएर", "गरेर", "खेलेर",
+        "घर", "नेपाल", "विकास", "यस", "को", "मञ्च",
+    ]
+    lx = _lex.default()
+    for w in critical:
+        toks, tags, br, ret, src = lx.process(w)
+        bad = violates(w, toks, ret)
+        if bad:
+            FAIL.append("TRAILING-SCHWA %s: tokens=%s (branch=%s)" % (w, toks, br))
 
-# (2) Full corpus scan via lexicon (every word must satisfy invariant)
-print("\n=== (2) FULL CORPUS INVARIANT SCAN ===")
-checked = 0
-for word in lx._entries:
-    s = _nz.NFC(word)
-    if not final_is_live_consonant(s):
-        continue
-    toks, tags, br, ret, src = lx.process(s)
-    if violates(s, toks, ret):
-        FAIL.append("CORPUS %s: tokens=%s (branch=%s)" % (s, toks, br))
-    checked += 1
-print("  scanned %d live-final words from lexicon" % checked)
+    # (2) Full corpus scan via lexicon (every word must satisfy invariant)
+    checked = 0
+    for word in lx._entries:
+        s = _nz.NFC(word)
+        if not final_is_live_consonant(s):
+            continue
+        toks, tags, br, ret, src = lx.process(s)
+        if violates(s, toks, ret):
+            FAIL.append("CORPUS %s: tokens=%s (branch=%s)" % (s, toks, br))
+        checked += 1
 
-print("\n" + "=" * 60)
-if FAIL:
-    print("FAILED (%d):" % len(FAIL))
-    for f in FAIL:
-        print("  - " + f)
-    sys.exit(1)
-print("ALL TESTS PASSED. No trailing-schwa defect (Kala 'r ax' class) present.")
-sys.exit(0)
+    assert not FAIL, "Trailing schwa defect violations: %s" % FAIL
+
+
+if __name__ == "__main__":
+    test_no_trailing_schwa()
+    print("ALL TESTS PASSED. No trailing-schwa defect (Kala 'r ax' class) present.")
+

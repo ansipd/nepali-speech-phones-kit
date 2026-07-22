@@ -55,18 +55,18 @@ VI_RAMA = "\u094d"  # U+094D halanta
 # FINAL consonant is an aspirated stop/affricate KEEPS its inherent /a/ (e.g.
 # दुख -> dukha, सुख -> sukha): the breathy release is realized with a following
 # vowel, so the final /a/ is not elided. Phonotactic class rule (not a word
-# list) — subsumes the दुख/सुख case confirmed by native review. Extend the set
+# list) — subsumes the दुख/सुखा case confirmed by native review. Extend the set
 # only with native confirmation for other aspirated finals.
-_ASPIRATED = {"\u0916",  # ख
-              "\u0918",  # घ
-              "\u091a",  # छ
-              "\u091c",  # झ
-              "\u0920",  # ठ
-              "\u0922",  # ढ
-              "\u0926",  # थ
-              "\u0927",  # ध
-              "\u092b",  # फ
-              "\u092c"}  # भ
+_ASPIRATED = {"\u0916",  # ख (kh)
+              "\u0918",  # घ (gh)
+              "\u091b",  # छ (ch)
+              "\u091d",  # झ (jh)
+              "\u0920",  # ठ (th)
+              "\u0922",  # ढ (dh)
+              "\u0925",  # थ (Th)
+              "\u0927",  # ध (Dh)
+              "\u092b",  # फ (ph)
+              "\u092d"}  # भ (bh)
 
 
 def _final_consonant_base(orth):

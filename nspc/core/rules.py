@@ -78,12 +78,11 @@ CONSONANT_BASE = {
 # which case the matra supplies the vowel and no trailing 'a' is added.
 CLUSTER_MAP = {
     ("\u0915", "\u094d", "\u0937"): ["k", "sh", "a"],   # क्ष -> ksha
-    ("\u091c", "\u094d", "\u0944"): ["g", "y"],   # ज्ञ (ज+्+ञ) -> gy (ज्ञान=gyan)
-    ("\u091c", "\u094d", "\u091e"): ["g", "y"],   # ज्ञ alt
-    ("\u0924", "\u094d", "\u0930"): ["t", "r", "a"],   # त्र -> tra
+    ("\u091c", "\u094d", "\u091e"): ["g", "y"],   # ज्ञ (ज+्+ञ) -> gy (ज्ञान=gyan)
+    ("\u0924", "\u094d", "\u0930"): ["T", "r", "a"],   # त्र -> Tra (dental T)
     ("\u0936", "\u094d", "\u0930"): ["sh", "r", "a"],  # श्र -> shra
     ("\u0938", "\u094d", "\u0924"): ["s", "T", "a"],   # स्त -> sta
-    ("\u0938", "\u094d", "\u0924", "\u094d", "\u0930"): ["s", "t", "r", "a"],  # स्त्र -> stra (stacked conjunct)
+    ("\u0938", "\u094d", "\u0924", "\u094d", "\u0930"): ["s", "T", "r", "a"],  # स्त्र -> stra (dental T)
     ("\u0938", "\u094d", "\u092e"): ["s", "m", "a"],   # स्म -> sma
     ("\u0926", "\u094d", "\u0930"): ["D", "r", "a"],   # द्र -> dra
     ("\u0915", "\u094d", "\u0930"): ["k", "r", "a"],   # क्र -> kra
@@ -105,15 +104,15 @@ _ANUSVARA_NASAL = {
     "k": "ng", "kh": "ng", "g": "ng", "gh": "ng", "ng": "ng",
     # palatal
     "c": "ny", "ch": "ny", "j": "ny", "jh": "ny", "ny": "ny",
-    # retroflex
-    "t": "N", "th": "N", "d": "N", "dh": "N", "n": "N",
-    # dental
-    "T": "n", "Th": "n", "D": "n", "Dh": "n", "N": "n",
+    # retroflex (n = retroflex [ɳ])
+    "t": "n", "th": "n", "d": "n", "dh": "n", "n": "n",
+    # dental (N = dental [n])
+    "T": "N", "Th": "N", "D": "N", "Dh": "N", "N": "N",
     # labial
     "p": "m", "ph": "m", "b": "m", "bh": "m", "m": "m",
     # semivowels / approximants / sibilants / h
-    "y": "n", "r": "n", "l": "n", "w": "n",
-    "s": "n", "sh": "n", "S": "n", "h": "n",
+    "y": "N", "r": "N", "l": "N", "w": "N",
+    "s": "N", "sh": "N", "S": "N", "h": "N",
     # multi-char conjunct tokens: assimilate by their leading place
     "ks": "ng", "jn": "ny", "tr": "N",
 }

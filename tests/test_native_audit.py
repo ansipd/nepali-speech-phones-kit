@@ -66,18 +66,13 @@ AUDIT = [
 ]
 
 
-def main():
+def test_native_audit():
     lx = _lex.default()
     fails = []
     warns = 0
-    print("=== (T4) NATIVE-SPEAKER AUDIT ===")
     for word, expected, branch, note in AUDIT:
         toks, tags, br, ret, src = lx.process(word)
-        # PRIMARY: tokens must match the validated pronunciation.
         tok_ok = (toks == expected)
-        # SECONDARY: branch matches (hard-fail only if word is in lexicon,
-        # i.e. we have an authoritative tag; OOV words rely on rules and may
-        # differ in branch label while still producing correct tokens).
         in_lex = word in lx._entries
         br_ok = (br == branch) if in_lex else True
         ok = tok_ok and br_ok
@@ -85,22 +80,11 @@ def main():
             fails.append((word, expected, toks, note))
         elif not br_ok:
             warns += 1
-            print("  WARN %-10s branch %s (expected %s, OOV) tokens OK [%s]"
-                  % (word, br, branch, note))
-        if ok:
-            print("  %-10s %-22s %s OK [%s]" % (
-                word, " ".join(toks), branch, note))
-    print("\n" + "=" * 60)
-    if fails:
-        print("FAILED (%d):" % len(fails))
-        for w, exp, got, note in fails:
-            print("  %s: exp=%s got=%s  [%s]" % (w, exp, got, note))
-        sys.exit(1)
-    print("ALL AUDIT TOKENS PASS (%d). Branch warnings (OOV): %d."
-          % (len(AUDIT), warns))
-    sys.exit(0)
+    assert not fails, "Native audit failures: %s" % fails
 
 
 if __name__ == "__main__":
-    main()
+    test_native_audit()
+    print("ALL AUDIT TOKENS PASS.")
+
 

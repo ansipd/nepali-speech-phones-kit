@@ -12,10 +12,10 @@ INVARIANT (locks in the ँ vs ं split — R3.4 of the Standard):
   realized in Nepali), NOT vowel nasalization:
       velar    (कखगघङ)        -> ng   (संगीत -> sangit)
       palatal  (चछजझञ)        -> ny   (संज्ञ  -> sanj~nya)
-      retroflex(टठडढण)         -> N
-      dental   (तथदधन)         -> n    (संतति -> santati)
+      retroflex(टठडढण)         -> n
+      dental   (तथदधन)         -> N    (संतति -> saNTaTi)
       labial   (पफबभम)         -> m    (संभव -> sambhav)
-      semi/sibilant/h (यरलवशषसह) -> n (संस्कृति -> sanskriti)
+      semi/sibilant/h (यरलवशषसह) -> N (संस्कृति -> saNskriTi)
 
 The OLD bug (treating ँ and ं identically by just nasalizing the preceding
 vowel) is prevented: an anusvara before a stop must produce a nasal consonant
@@ -44,33 +44,25 @@ CASES = [
     # --- anusvara before stops: homorganic nasal consonant ---
     ("संगीत", "sanggi:T", "ं before ग (velar) -> ng"),
     ("संभव",  "sambhaw",  "ं before भ (labial) -> m"),
-    ("संस्कृति", "sanskrTi", "ं before स (sibilant) -> n"),
+    ("संस्कृति", "saNskrTi", "ं before स (sibilant) -> N"),
     ("संज्ञ",  "sanygy",   "ं before ज (palatal) -> ny"),
-    ("हंस",   "hans",     "ं before स (sibilant) -> n"),
-    ("कंठ",   "kaNtha",   "ं before ठ (retroflex) -> N"),
+    ("हंस",   "haNs",     "ं before स (sibilant) -> N"),
+    ("कंठ",   "kantha",   "ं before ठ (retroflex) -> n"),
     ("पंख",   "pangkha",  "ं before ख (velar) -> ng"),
 ]
 
 
-def main():
-    failures = 0
-    print("=" * 60)
-    print("NASAL: ँ (chandrabindu) vs ं (anusvara) split — R3.4")
-    print("=" * 60)
+def test_nasal_anusvara_chandrabindu():
+    failures = []
     for word, expected, note in CASES:
         tokens, _, _, _, src = _lex.process(word)
         got = plain(tokens)
-        ok = (got == expected)
-        if not ok:
-            failures += 1
-        print("  %-10s -> %-12s (exp %-12s) %s  [%s]"
-              % (word, got, expected, "OK" if ok else "FAIL", note))
-    if failures:
-        print("\nFAILED (%d): ँ/ं split regression broken." % failures)
-        sys.exit(1)
-    print("\nALL NASAL SPLIT CHECKS PASS (%d)." % len(CASES))
-    sys.exit(0)
+        if got != expected:
+            failures.append((word, got, expected, note))
+    assert not failures, "Nasal split failures: %s" % failures
 
 
 if __name__ == "__main__":
-    main()
+    test_nasal_anusvara_chandrabindu()
+    print("ALL NASAL SPLIT CHECKS PASS.")
+
