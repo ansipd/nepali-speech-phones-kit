@@ -27,6 +27,7 @@ from .core.adapters import ipa as _ipa
 from .core.adapters import json as _json
 from .core.adapters import piper as _piper
 from .core.adapters import matcha as _matcha
+from .core.adapters import kokoro as _kokoro
 
 
 def _process_text(text, fmt):
@@ -66,7 +67,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="nspc", description="Nepali Speech Phones Kit")
     ap.add_argument("--text", help="Devanagari (or mixed) text")
     ap.add_argument("--file", help="path to a text file")
-    ap.add_argument("--format", choices=["ipa", "json", "piper", "matcha"],
+    ap.add_argument("--format", choices=["ipa", "json", "piper", "matcha", "kokoro"],
                     default="ipa")
     ap.add_argument("--tokens-file", action="store_true",
                     help="print canonical inventory tokens and exit")
@@ -74,6 +75,8 @@ def main(argv=None):
                     help="print Piper phoneme_id_map and exit")
     ap.add_argument("--matcha-tokens", action="store_true",
                     help="print Matcha tokens.txt and exit")
+    ap.add_argument("--kokoro-vocab", action="store_true",
+                    help="print Kokoro vocab.json and exit")
     args = ap.parse_args(argv)
 
     if args.tokens_file:
@@ -86,6 +89,9 @@ def main(argv=None):
         return 0
     if args.matcha_tokens:
         print(_matcha.tokens_txt_string())
+        return 0
+    if args.kokoro_vocab:
+        print(_kokoro.vocab_json_string())
         return 0
 
     if not args.text and not args.file:
