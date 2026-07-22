@@ -405,6 +405,13 @@ def segment(word, tags=None):
                     out.append("b")  # Rule 2: Native Tadbhava initial onset shift (वन, विकास -> b)
                 else:
                     out.append("v")  # Rule 3: Foreign loans (वकिल, वकालत -> v) & medial glides
+            elif cp == "\u092d":  # Devanagari 'भ' (bh)
+                # R7.1: post-vocalic de-aspiration in rapid speech (e.g. अनुभव -> anubab, सुलभ -> sulab)
+                is_post_vocalic = (i > 0 and out and out[-1] in _inv.VOWELS)
+                if is_post_vocalic:
+                    out.append("b")
+                else:
+                    out.append("bh")
             else:
                 out.append(CONSONANT_BASE[cp])
             nxt = cps[i + 1] if i + 1 < n else None
@@ -470,8 +477,12 @@ def segment(word, tags=None):
             continue
 
         if cp == VISARGA:
-            # visarga -> /h/ (Sanskrit retention); rare in Nepali
-            out.append("h")
+            # R2.4: Visarga is SILENT when followed by a consonant (e.g. दुःख -> dukha)
+            nxt_c = cps[i + 1] if i + 1 < n else None
+            if nxt_c is not None and _is_consonant_base(nxt_c):
+                pass  # silent before consonant (Sanskrit retention)
+            else:
+                out.append("h")
             i += 1
             continue
 

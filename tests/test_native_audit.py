@@ -59,6 +59,8 @@ AUDIT = [
     # --- final-अ kept on short words (native validated) ---
     ("म", ["m", "a"], "C6", "pronoun ma"),
     ("दुख", ["D", "u", "kh", "a"], "C5b", "dukha (aspirated-final ख keeps अ)"),
+    ("दुःख", ["D", "u", "kh", "a"], "C5b", "dukha (R2.4 Visarga silent before stop kh)"),
+    ("अनुभव", ["a", "N", "u", "b", "a", "v"], "C6", "anubav (R7.1 post-vocalic bh de-aspiration)"),
     ("सुख", ["s", "u", "kh", "a"], "C5b", "sukha (aspirated-final ख keeps अ)"),
     ("यस", ["y", "u", "s"], "C6", "yus (अ→u)"),
     ("उसले", ["u", "s", "l", "e"], "C6", "usle (medial schwa deleted)"),
