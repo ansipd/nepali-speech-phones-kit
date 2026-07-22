@@ -48,7 +48,7 @@ CONSONANTS = {
     "t", "th", "d", "dh", "n",    # ट ठ ड ढ ण
     "T", "Th", "D", "Dh", "N",    # त थ द ध न  (capital = dental)
     "p", "ph", "b", "bh", "m",    # प फ ब भ म
-    "y", "r", "l", "w",           # य र ल व
+    "y", "r", "l", "v",           # य र ल व (v = labiodental /ʋ/)
     "s",                          # स (alveolar s)
     "sh",                         # श (palatal ʃ)
     "S",                          # ष (retroflex ʂ)
@@ -76,7 +76,7 @@ TO_IPA: Dict[str, str] = {
     "t": "ʈ", "th": "ʈʰ", "d": "ɖ", "dh": "ɖʱ", "n": "ɳ",
     "T": "t", "Th": "tʰ", "D": "d", "Dh": "dʱ", "N": "n",
     "p": "p", "ph": "pʰ", "b": "b", "bh": "bʱ", "m": "m",
-    "y": "j", "r": "r", "l": "l", "w": "ʋ",
+    "y": "j", "r": "r", "l": "l", "v": "ʋ",
     "s": "s", "sh": "ʃ", "S": "ʂ", "h": "ɦ",
     "ks": "kʂ", "jn": "ɡɲ", "tr": "t̪r",
 }

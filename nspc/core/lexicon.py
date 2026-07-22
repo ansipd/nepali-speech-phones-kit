@@ -113,10 +113,18 @@ class Lexicon:
             # foreign loan ending in a conjunct (र्क) -> delete final schwa
             "पार्क":   {"tags": {"foreign": True, "donor_schwa": False},
                         "branch": "C5", "retain": False},
-            # tatsama: विकास retains final schwa (vikās). (देश now covered by
-            # U5 TATSAMA_DELETE; verb forms भन्छ/सुत्छ/हुन्छ/भएन by U5 C2b;
-            # देशतिर/स्कन्ध/स्कुल by rule — all removed as redundant 2026-07-19.)
-            "विकास":   {"tags": {"tatsama": True}, "branch": "C4", "retain": True},
+            # --- Tier 1: Loanwords with specific /v/ realization ---
+            "सलवार":   {"tokens": ["s", "a", "l", "v", "a:", "r"], "branch": "C6",
+                        "retain": False, "note": "salvar (Tier 1 loanword)"},
+            "स्वेटर":   {"tokens": ["s", "v", "e", "T", "a", "r"], "branch": "C6",
+                        "retain": False, "note": "svetar (Tier 1 loanword)"},
+            # --- Tier 3: Tadbhava / b-shift overrides (colloquial speech) ---
+            "वन":       {"tokens": ["b", "a", "n"], "branch": "C6",
+                        "retain": False, "note": "ban (Tier 3 Tadbhava b-shift)"},
+            "विकास":   {"tokens": ["b", "i", "k", "a:", "s"], "branch": "C4",
+                        "retain": False, "note": "bikas (Tier 3 Tadbhava b-shift)"},
+            "विवाह":   {"tokens": ["b", "i", "b", "a:", "h"], "branch": "C6",
+                        "retain": False, "note": "bibah (Tier 3 Tadbhava b-shift)"},
             # --- native-validated corrections (T6 listening review) ---------
             # These override OOV-rule errors where Nepali deletes/keeps a
             # schwa that the orthography-only rule gets wrong. Each carries

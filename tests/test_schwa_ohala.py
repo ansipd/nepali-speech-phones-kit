@@ -33,8 +33,8 @@ _CASES = [
     # (word, expected_tokens, note)
     ("सरकार", ["s", "a", "r", "k", "a:", "r"], "स keeps, र coda drops, का long"),
     ("तरबार", ["T", "a", "r", "b", "a:", "r"], "त keeps, र coda drops"),
-    ("सलवार", ["s", "a", "l", "w", "a:", "r"], "स keeps, ल coda drops"),
-    ("तलवार", ["T", "a", "l", "w", "a:", "r"], "त keeps, ल coda drops"),
+    ("सलवार", ["s", "a", "l", "v", "a:", "r"], "स keeps, ल coda drops"),
+    ("तलवार", ["T", "a", "l", "v", "a:", "r"], "त keeps, ल coda drops"),
     # protected
     ("कमल",   ["k", "a", "m", "a", "l"], "ल word-final keeps"),
     ("करण",   ["k", "a", "r", "a", "n"], "ण word-final -> र keeps; final ण drops अ (C6)"),

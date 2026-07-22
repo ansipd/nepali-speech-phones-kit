@@ -40,7 +40,7 @@ AUDIT = [
     ("मञ्च", ["m", "a", "n", "ch"], "C1", "manch (final अ dropped, speech variant)"),
     # --- tatsama RETAIN (C4) / native DELETE (C6) ---
     ("सरकार", ["s", "a", "r", "k", "a:", "r"], "C6", "sarka:r (medial schwa deleted; का=long a:)"),
-    ("विकास", ["w", "i", "k", "a:", "s", "a"], "C4", "tatsama retain (vikās; का=long a:)"),
+    ("विकास", ["b", "i", "k", "a:", "s"], "C4", "tatsama retain (bikas; b-shift)"),
     ("देश", ["D", "e", "sh"], "C4", "tatsama delete (deś)"),
     ("घर", ["gh", "a", "r"], "C6", "native delete"),
     ("नेपाल", ["N", "e", "p", "a:", "l"], "C6", "native delete; पा=long a:"),

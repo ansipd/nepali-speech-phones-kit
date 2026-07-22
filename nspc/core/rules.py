@@ -64,7 +64,7 @@ CONSONANT_BASE = {
     "\u091f": "t", "\u0920": "th", "\u0921": "d", "\u0922": "dh", "\u0923": "n",
     "\u0924": "T", "\u0925": "Th", "\u0926": "D", "\u0927": "Dh", "\u0928": "N",
     "\u092a": "p", "\u092b": "ph", "\u092c": "b", "\u092d": "bh", "\u092e": "m",
-    "\u092f": "y", "\u0930": "r", "\u0932": "l", "\u0935": "w", "\u0938": "s",
+    "\u092f": "y", "\u0930": "r", "\u0932": "l", "\u0935": "v", "\u0938": "s",
     "\u0936": "sh", "\u0937": "S", "\u0939": "h",
 }
 
@@ -111,7 +111,7 @@ _ANUSVARA_NASAL = {
     # labial
     "p": "m", "ph": "m", "b": "m", "bh": "m", "m": "m",
     # semivowels / approximants / sibilants / h
-    "y": "N", "r": "N", "l": "N", "w": "N",
+    "y": "N", "r": "N", "l": "N", "v": "N",
     "s": "N", "sh": "N", "S": "N", "h": "N",
     # multi-char conjunct tokens: assimilate by their leading place
     "ks": "ng", "jn": "ny", "tr": "N",

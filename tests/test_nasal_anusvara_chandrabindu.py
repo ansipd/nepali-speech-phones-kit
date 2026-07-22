@@ -43,7 +43,7 @@ CASES = [
     ("सँगै",  "sagai",    "ँ -> vowel nasalization (सँगै -> sa~gai = sagai)"),
     # --- anusvara before stops: homorganic nasal consonant ---
     ("संगीत", "sanggi:T", "ं before ग (velar) -> ng"),
-    ("संभव",  "sambhaw",  "ं before भ (labial) -> m"),
+    ("संभव",  "sambhav",  "ं before भ (labial) -> m"),
     ("संस्कृति", "saNskrTi", "ं before स (sibilant) -> N"),
     ("संज्ञ",  "sanygy",   "ं before ज (palatal) -> ny"),
     ("हंस",   "haNs",     "ं before स (sibilant) -> N"),
