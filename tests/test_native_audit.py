@@ -47,6 +47,9 @@ AUDIT = [
     # --- foreign loan DELETE (C5) ---
     ("पार्क", ["p", "a:", "r", "k"], "C5", "foreign delete; पा=long a:"),
     ("स्कुल", ["s", "k", "u", "l"], "C6", "foreign loan delete"),
+    # --- environmental व rules (onset b vs cluster/foreign v) ---
+    ("वन", ["b", "a", "N"], "C6", "native initial व -> b (ban)"),
+    ("विश्वास", ["b", "i", "sh", "v", "a:", "s"], "C6", "cluster श्+व -> v (bishvas)"),
     # --- compound: join-schwa deleted (R7), suffix keeps its own अ ---
     ("करणबाट", ["k", "a", "r", "a", "n", "b", "a:", "t", "a"], "C6", "karanbata (join schwa deleted; बा=long a:)"),
     ("देशतिर", ["D", "e", "sh", "T", "i", "r", "a"], "C6", "deshtira (final अ kept)"),

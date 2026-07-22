@@ -395,7 +395,18 @@ def segment(word, tags=None):
 
         # 3) consonant base
         if _is_consonant_base(cp):
-            out.append(CONSONANT_BASE[cp])
+            if cp == "\u0935":  # Devanagari 'व'
+                prev_is_virama = (i > 0 and cps[i - 1] == VI_RAMA)
+                is_initial = (i == 0)
+                is_foreign = tags.get("foreign", False) if tags else False
+                if prev_is_virama:
+                    out.append("v")  # Rule 1: Cluster protection (स्वाद, विश्वास -> v)
+                elif is_initial and not is_foreign:
+                    out.append("b")  # Rule 2: Native Tadbhava initial onset shift (वन, विकास -> b)
+                else:
+                    out.append("v")  # Rule 3: Foreign loans (वकिल, वकालत -> v) & medial glides
+            else:
+                out.append(CONSONANT_BASE[cp])
             nxt = cps[i + 1] if i + 1 < n else None
             if nxt == VI_RAMA:
                 # dead consonant (halanta): no inherent vowel; skip virama
