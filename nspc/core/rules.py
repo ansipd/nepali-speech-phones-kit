@@ -53,6 +53,8 @@ INDEP_VOWEL = {
     "\u090b": "r~",  # ऋ
     "\u090f": "e",   # ए
     "\u0910": "ai",  # ऐ (independent vowel, same as matra ै)
+    "\u0913": "o",   # ओ (independent vowel, same as matra ो)
+    "\u0914": "au",  # औ (independent vowel, same as matra ौ)
 }
 
 # ---------------------------------------------------------------------------
@@ -124,9 +126,19 @@ _ANUSVARA_NASAL = {
 _POSTPOSITIONS = [
     "जस्तै", "आदि", "वाला", "दार", "सँगै", "पछि", "अघि", "भरि", "सम्म",
     "हरू", "हरु", "सँग", "तिर", "बाट", "मा", "ले", "को", "का", "पनि", "सित",
-    "पटक", "पल्ट", "पति", "बिना", "सँग", "लाई",
+    "पटक", "पल्ट", "पति", "बिना", "लाई",
+    "कै", "भित्र",
 ]
 _POSTPOS_SET = set(_POSTPOSITIONS)
+
+# Number-compound suffixes (tens bases like चालीस, सट्ठी, हत्तर) that trigger
+# R7 join-schwa deletion at the prefix boundary (e.g. अठ + तीस -> अठतीस,
+# एक + चालीस -> एकचालीस). Unlike postpositions, these do NOT set
+# is_postposition — number words follow C6 default DELETE for final schwa.
+# Only longer, unique suffixes are included to avoid false positives.
+_NUM_COMPOUND_SUFFIXES = {
+    "तीस", "चालीस", "पन्न", "सट्ठी", "हत्तर",
+}
 
 # Valid MEDIAL consonant clusters (C1 + C2) where the inherent /a/ of C1 is
 # deleted (the pair forms a single onset/cluster in Nepali). R7-general:
@@ -315,57 +327,87 @@ def segment(word, tags=None):
     # so नेपालको -> nepalko (no extra schwa); साउन -> saun (न drops), so
     # साउनलाई -> saunlai. But म -> ma (लाई keeps its /a/), so मलाई -> malai
     # (the host's final /a/ is retained, NOT deleted at the join).
-    join_idx = -1
-    host_drops_final_a = False
-    for suf in sorted(_POSTPOS_SET, key=len, reverse=True):
-        if s.endswith(suf) and len(s) > len(suf):
-            host = s[:len(s) - len(suf)]
-            for j in range(len(host) - 1, -1, -1):
-                if _is_consonant_base(host[j]) and \
-                        (j + 1 >= len(host) or host[j + 1] != VI_RAMA):
-                    join_idx = j
+    # R7 recursive: find ALL suffix/postposition boundaries from the tail inward
+    # (e.g. जवानहरूकै has boundaries at न before हरू and र before कै).
+    join_idxs: set[int] = set()
+    host_drops: dict[int, bool] = {}
+    _remaining = s
+    while True:
+        matched = False
+        for suf in sorted(_POSTPOS_SET, key=len, reverse=True):
+            if _remaining.endswith(suf) and len(_remaining) > len(suf):
+                _host = _remaining[:len(_remaining) - len(suf)]
+                for j in range(len(_host) - 1, -1, -1):
+                    if _is_consonant_base(_host[j]) and \
+                            (j + 1 >= len(_host) or _host[j + 1] != VI_RAMA):
+                        _join = j
+                        break
+                join_idxs.add(_join)
+                # Determine the host's standalone final-vowel behaviour. The host
+                # KEEPS its final inherent /a/ at the join iff, pronounced standalone,
+                # it retains its final schwa per U5 — UNLESS the host is a single
+                # live consonant (e.g. म -> "ma"), which always keeps its inherent
+                # /a/ regardless of the C6 default. Examples:
+                #   म     -> ma     (single live C, keeps) -> मलाई   = malai
+                #   घर    -> ghar   (U5 RETAIN, keeps)      -> घरलाई  = gharlai
+                #   यस    -> yas    (U5 RETAIN, keeps)      -> यसलाई  = yaslai
+                #   नेपाल -> nepal  (U5 DELETE, drops)      -> नेपालको = nepalko
+                #   साउन  -> saun   (U5 DELETE, drops)      -> साउनलाई = saunlai
+                #   करण   -> karan  (U5 DELETE, drops)      -> करणबाट = karanbata
+                from .u5_reference import u5 as _u5
+                from .normalize import auto_tag as _auto_tag
+                _, _host_retain, _ = _u5(_host, _auto_tag(_host))
+                _host_bases = sum(1 for c in _host if _is_consonant_base(c) or c in INDEP_VOWEL)
+                # Host-final base consonant (skip matras / nasals / virama).
+                _host_final = None
+                for _c in reversed(_host):
+                    if _is_consonant_base(_c):
+                        _host_final = _c
+                        break
+                # At a compound join the host's final inherent /a/ is deleted UNLESS
+                # the host-final consonant is a liquid/glide, which surfaces as a
+                # syllable PEAK and is retained (नेपाल->Nepa:l, घर->ghar before a
+                # suffix). This generalizes R7: a polysyllabic host drops its final
+                # schwa at the boundary regardless of its standalone U5 decision
+                # (so समाज->sama:j, सिमेन्ट->simenT, पार्क->pa:rk lose their final
+                # /a/ before वाला, while नेपाल/घर keep the liquid peak). Monosyllabic
+                # hosts (उस/कस/...) are handled by the curated list, not here.
+                # At a compound join the host's final inherent /a/ is deleted when
+                # EITHER (a) the host itself deletes its final schwa standalone
+                # (U5 retain=False: HALANTA_FINAL नेपाल/घर, C6 कलम/करण), OR
+                # (b) the host-final consonant is a NON-liquid stop/affricate. A
+                # non-liquid stem-final drops its /a/ before a suffix (पार्क->pa:rk,
+                # समाज->sama:j, सिमेन्ट->simenT all lose the final /a/ before वाला),
+                # while a liquid/glide final surfaces as a syllable PEAK and is
+                # retained (यस->yas before a suffix). Monosyllabic hosts (उस/कस/...)
+                # are handled by the curated list, not here.
+                _drops = (_host_bases > 1 or _host.endswith(VI_RAMA)) and \
+                    ((not _host_retain) or
+                     (_host_final is not None and _host_final not in _LIQUID_GLIDE))
+                host_drops[_join] = _drops
+                _remaining = _host
+                matched = True
+                break
+        if not matched:
+            # Check number-compound suffixes (e.g. चालीस, हत्तर). These also
+            # trigger R7 join schwa deletion at the prefix boundary, but the
+            # prefix ALWAYS drops its final schwa (unlike postpositions which
+            # have complex retention rules). Number suffixes do NOT set
+            # is_postposition — number words use C6 default DELETE.
+            for suf in sorted(_NUM_COMPOUND_SUFFIXES, key=len, reverse=True):
+                if _remaining.endswith(suf) and len(_remaining) > len(suf):
+                    _host = _remaining[:len(_remaining) - len(suf)]
+                    for j in range(len(_host) - 1, -1, -1):
+                        if _is_consonant_base(_host[j]) and \
+                                (j + 1 >= len(_host) or _host[j + 1] != VI_RAMA):
+                            _join = j
+                            break
+                    join_idxs.add(_join)
+                    host_drops[_join] = True  # prefix always drops in number compounds
+                    _remaining = _host
+                    matched = True
                     break
-            # Determine the host's standalone final-vowel behaviour. The host
-            # KEEPS its final inherent /a/ at the join iff, pronounced standalone,
-            # it retains its final schwa per U5 — UNLESS the host is a single
-            # live consonant (e.g. म -> "ma"), which always keeps its inherent
-            # /a/ regardless of the C6 default. Examples:
-            #   म     -> ma     (single live C, keeps) -> मलाई   = malai
-            #   घर    -> ghar   (U5 RETAIN, keeps)      -> घरलाई  = gharlai
-            #   यस    -> yas    (U5 RETAIN, keeps)      -> यसलाई  = yaslai
-            #   नेपाल -> nepal  (U5 DELETE, drops)      -> नेपालको = nepalko
-            #   साउन  -> saun   (U5 DELETE, drops)      -> साउनलाई = saunlai
-            #   करण   -> karan  (U5 DELETE, drops)      -> करणबाट = karanbata
-            from .u5_reference import u5 as _u5
-            from .normalize import auto_tag as _auto_tag
-            _, _host_retain, _ = _u5(host, _auto_tag(host))
-            _host_cons = sum(1 for c in host if _is_consonant_base(c))
-            # Host-final base consonant (skip trailing matras / nasals / virama).
-            _host_final = None
-            for _c in reversed(host):
-                if _is_consonant_base(_c):
-                    _host_final = _c
-                    break
-            # At a compound join the host's final inherent /a/ is deleted UNLESS
-            # the host-final consonant is a liquid/glide, which surfaces as a
-            # syllable PEAK and is retained (नेपाल->Nepa:l, घर->ghar before a
-            # suffix). This generalizes R7: a polysyllabic host drops its final
-            # schwa at the boundary regardless of its standalone U5 decision
-            # (so समाज->sama:j, सिमेन्ट->simenT, पार्क->pa:rk lose their final
-            # /a/ before वाला, while नेपाल/घर keep the liquid peak). Monosyllabic
-            # hosts (उस/कस/...) are handled by the curated list, not here.
-            # At a compound join the host's final inherent /a/ is deleted when
-            # EITHER (a) the host itself deletes its final schwa standalone
-            # (U5 retain=False: HALANTA_FINAL नेपाल/घर, C6 कलम/करण), OR
-            # (b) the host-final consonant is a NON-liquid stop/affricate. A
-            # non-liquid stem-final drops its /a/ before a suffix (पार्क->pa:rk,
-            # समाज->sama:j, सिमेन्ट->simenT all lose the final /a/ before वाला),
-            # while a liquid/glide final surfaces as a syllable PEAK and is
-            # retained (यस->yas before a suffix). Monosyllabic hosts (उस/कस/...)
-            # are handled by the curated list, not here.
-            host_drops_final_a = (_host_cons > 1 or host.endswith(VI_RAMA)) and \
-                ((not _host_retain) or
-                 (_host_final is not None and _host_final not in _LIQUID_GLIDE))
+        if not matched:
             break
 
     while i < n:
@@ -430,12 +472,13 @@ def segment(word, tags=None):
             # with the following consonant (R7-general: fricative+stop etc.).
             is_final = (i == n - 1)
             medial = False
-            if not (is_final and not retain) and i != join_idx:
+            _ohala_boundary = min(join_idxs) if join_idxs else -1
+            if not (is_final and not retain) and i not in join_idxs:
                 # Ohala internal schwa deletion: a live consonant followed by a
                 # liquid/glide that begins a new syllable drops its /a/.
-                medial = _ohala_internal_schwa(cps, i, join_idx)
+                medial = _ohala_internal_schwa(cps, i, _ohala_boundary)
             if (is_final and not retain and not is_postposition) or \
-                    (i == join_idx and host_drops_final_a) or medial:
+                    (i in join_idxs and host_drops.get(i, False)) or medial:
                 pass  # suppress inherent /a/
             else:
                 out.append("a")
@@ -469,9 +512,9 @@ def segment(word, tags=None):
             #   dental (तथदधन)         -> n    (संतति = santati)
             #   labial (पफबभम)         -> m    (संभव = sambhav)
             #   semi/appoint(yrlwशषसह)-> n    (संस्कृति = sanskriti)
-            # If no following consonant, default to 'n' (rare, word-final ं).
+            # If no following consonant, default to 'N' (dental [n]; word-final ं).
             nxt_cons = _next_consonant_token(cps, i)
-            nasal = _ANUSVARA_NASAL.get(nxt_cons, "n")
+            nasal = _ANUSVARA_NASAL.get(nxt_cons, "N")
             out.append(nasal)
             i += 1
             continue

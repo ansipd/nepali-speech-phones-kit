@@ -30,12 +30,13 @@ _POSTPOSITIONS = {
     "जस्तै", "आदि", "वाला", "दार", "सँगै", "पछि", "अघि", "भरि", "सम्म",
     "हरू", "हरु", "सँग", "तिर", "बाट", "मा", "ले", "को", "का", "पनि", "सित",
     "पटक", "पल्ट", "पति", "बिना", "लाई",
+    "कै", "भित्र",
 }
 
 # Traditional HALANTA words: written without a virama yet pronounced WITHOUT
 # the final inherent /a/ (exception to the C6 RETAIN default). Confirmed by
 # native-speaker review. Add others ONLY with native confirmation.
-HALANTA_FINAL = {"नेपाल", "प्रधान", "घर", "कमल"}
+HALANTA_FINAL = {"नेपाल", "प्रधान", "घर", "कमल", "आठ"}
 
 # Tatsama words that, despite being Sanskrit-derived (which normally retains
 # surface /a/), are nativized with a deleted final /a/ (e.g. देश -> deś, not
@@ -160,7 +161,12 @@ def u5(orth, tags):
     # dukha, सुख -> sukha). The breathy release is realized with a following
     # vowel, so the final /a/ is not elided. Phonotactic class rule (not a word
     # list); confirmed by native review on दुख/सुख.
-    if _final_consonant_base(orth) in _ASPIRATED:
+    # EXCEPTION: words in HALANTA_FINAL always DELETE (override C5b). This
+    # catches number words like आठ (a:th) where the number-word class overrides
+    # the aspirated-final retention rule.
+    if orth in HALANTA_FINAL:
+        pass  # fall through to C6 below, which applies HALANTA_FINAL
+    elif _final_consonant_base(orth) in _ASPIRATED:
         return ("C5b", True, "final aspirated stop -> RETAIN inherent /a/")
     # C6 — DEFAULT native noun/adj/assimilated word ending in a LIVE consonant
     # (no virama, no conjunct): the inherent /a/ is DELETED (verified native:

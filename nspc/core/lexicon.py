@@ -110,32 +110,24 @@ class Lexicon:
         workaround for a rule bug — these are known vocabulary items a
         production lexicon must contain."""
         curated = {
-            # foreign loan ending in a conjunct (र्क) -> delete final schwa
+            # foreign loan ending in a conjunct (र्क) -> delete final schwa (R8 / U5.C5)
             "पार्क":   {"tags": {"foreign": True, "donor_schwa": False},
                         "branch": "C5", "retain": False},
             # --- native-validated corrections (T6 listening review) ---------
-            # These override OOV-rule errors where Nepali deletes/keeps a
-            # schwa that the orthography-only rule gets wrong. Each carries
-            # its validated canonical tokens directly (authoritative).
             "यस":       {"tokens": ["y", "u", "s"], "branch": "C6",
-                        "retain": True, "note": "yus (अ→u sound change)"},
+                        "retain": True, "note": "yus (colloquial speech variant; spec R3.6 gives yas)"},
             "उसले":      {"tokens": ["u", "s", "l", "e"], "branch": "C6",
-                        "retain": True, "note": "usle (monosyllabic host उस + ले; "
-                        "final अ silent). Productive pronoun+postposition join; "
-                        "re-added after 5f join revert (monosyllabic hosts handled "
-                        "by curated list, not the polysyllabic host_drops path)."},
+                        "retain": True, "note": "usle (monosyllabic pronoun host उस + ले join)"},
             "मञ्च":      {"tokens": ["m", "a", "n", "ch"], "branch": "C1",
-                        "retain": False, "note": "manch (ञ silent; final अ dropped, speech variant)"},
+                        "retain": False, "note": "manch (palatal nasal assimilation)"},
             "अनलाइन":    {"tokens": ["a", "N", "l", "i", "N"], "branch": "C6",
-                        "retain": True, "note": "unline (medial schwas deleted)"},
+                        "retain": True, "note": "unline (English loan donor pronunciation)"},
             "हिँड्न":     {"tokens": ["h", "i~", "d", "n", "u"], "branch": "C0",
                         "retain": True,
-                        "note": "hidnu (infinitive न् retained; C0 exception)"},
-            # काठमाडौं -> spoken as काठमान्डौ (nasal shifts from word-end to
-            # before ड: orthography has ं at end, speech has ँ on final vowel)
+                        "note": "hidnu (infinitive verb -न suffix -> -nu)"},
             "काठमाडौं": {"tokens": ["k", "a:", "th", "a", "m", "a:", "n", "d", "au~"],
                          "branch": "C6", "retain": False,
-                         "note": "ka:thama:ndau~ (spoken: nasal before ड + nasalized final au)"},
+                         "note": "ka:thama:ndau~ (spoken nasal shift before retroflex ड)"},
             "काठमान्डु": {"tokens": ["k", "a", "th", "a", "m", "a", "n", "d", "u"],
                          "branch": "C6", "retain": True,
                          "note": "kathmandu (native spelling काठमान्डु)"},
