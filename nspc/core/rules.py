@@ -169,6 +169,9 @@ def _medial_cluster(c1, c2):
 # (र/ल/व/य) is a coda and DROPS its inherent /a/; the vowel belongs to the next
 # consonant. See _ohala_internal_schwa.
 _LIQUID_GLIDE = {"\u0930", "\u0932", "\u0935", "\u092f"}  # र ल व य
+# Matra + nasal diacritics: characters that can follow a consonant WITHOUT
+# blocking a join boundary (vowel signs and nasal marks).
+_MATRA_NASAL_SET = set(MATRA_TO_VOWEL.keys()) | {ANUSVARA, CHANDRABINDU}
 
 
 def _ohala_internal_schwa(cps, i, join_idx=None):
@@ -342,6 +345,18 @@ def segment(word, tags=None):
                             (j + 1 >= len(_host) or _host[j + 1] != VI_RAMA):
                         _join = j
                         break
+                # Block the join if an independent vowel sits between the
+                # consonant and the suffix (e.g. भए + को -> भएको: ए between
+                # भ and को means no schwa deletion on भ).
+                _suf_start = len(_host)
+                _blocked = False
+                for _k in range(_join + 1, _suf_start):
+                    if _host[_k] not in _MATRA_NASAL_SET:
+                        _blocked = True
+                        break
+                if _blocked:
+                    matched = False
+                    break  # skip this suffix, don't record join
                 join_idxs.add(_join)
                 # Determine the host's standalone final-vowel behaviour. The host
                 # KEEPS its final inherent /a/ at the join iff, pronounced standalone,
@@ -402,6 +417,14 @@ def segment(word, tags=None):
                                 (j + 1 >= len(_host) or _host[j + 1] != VI_RAMA):
                             _join = j
                             break
+                    _suf_start = len(_host)
+                    _blocked = False
+                    for _k in range(_join + 1, _suf_start):
+                        if _host[_k] not in _MATRA_NASAL_SET:
+                            _blocked = True
+                            break
+                    if _blocked:
+                        continue  # try next suffix
                     join_idxs.add(_join)
                     host_drops[_join] = True  # prefix always drops in number compounds
                     _remaining = _host

@@ -184,8 +184,9 @@ def ends_in_verb_suffix(s):
     # verb negative एन/ऐन: ए/े/ै + (न|र)  e.g. भएन, सुतएन
     if cps[-2] in (_EE_MATRA, _EE_INDEP, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
         return True
-    # infinitive उन (independent vowel उ + न) for words longer than उन itself
-    if n >= 3 and cps[-2] == "\u0909" and cps[-1] == "\u0928":
+    # infinitive उन (independent vowel उ + न) for words longer than साउन (4).
+    # साउन is a month name (not a verb) and ends in the same characters.
+    if n >= 5 and cps[-2] == "\u0909" and cps[-1] == "\u0928":
         return True
     return False
 
@@ -213,8 +214,8 @@ def verb_final_live(word):
     # live न/र after ए (matra or independent vowel)  e.g. भएन
     if cps[-2] in (_EE_MATRA, _EE_INDEP, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
         return True
-    # infinitive उन (independent vowel उ + live न)
-    if n >= 3 and cps[-2] == "\u0909" and cps[-1] == "\u0928":
+    # infinitive उन (independent vowel उ + live न) for words longer than साउन (4)
+    if n >= 5 and cps[-2] == "\u0909" and cps[-1] == "\u0928":
         return True
     return False
 
