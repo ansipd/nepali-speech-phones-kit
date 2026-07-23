@@ -31,7 +31,7 @@ VOWELS = {
     "u~",   # उँ
     "e~",   # एँ
     "o~",   # ओँ
-    "r~",   # ऋ (tatsama)
+    "ri",   # ऋ (modern Nepali)
     "ai",   # ऐ (diphthong; from ै matra and independent ऐ)
     "au",   # औ (au-kar, dirgha diphthong; from ौ matra)
     "a:~",  # आँ (nasalized long a; from ाँ, e.g. माँ, हाँ)
@@ -70,7 +70,7 @@ VALID = ALL_TOKENS
 TO_IPA: Dict[str, str] = {
     "a": "ə", "a:": "aː", "i": "i", "i:": "iː", "u": "u", "u:": "uː",
     "e": "e", "o": "o", "a~": "ã", "i~": "ĩ", "u~": "ũ", "e~": "ẽ",
-    "o~": "õ", "r~": "r̥", "au": "au", "a:~": "ãː", "au~": "ãu",
+    "o~": "õ", "ri": "ri", "au": "au", "a:~": "ãː", "au~": "ãu",
     "k": "k", "kh": "kʰ", "g": "ɡ", "gh": "ɡʱ", "ng": "ŋ",
     "c": "tʃ", "ch": "tʃʰ", "j": "dʒ", "jh": "dʒʱ", "ny": "ɲ",
     "t": "ʈ", "th": "ʈʰ", "d": "ɖ", "dh": "ɖʱ", "n": "ɳ",

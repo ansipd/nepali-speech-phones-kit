@@ -44,7 +44,7 @@ CASES = [
     # --- anusvara before stops: homorganic nasal consonant ---
     ("संगीत", "sanggi:T", "ं before ग (velar) -> ng"),
     ("संभव",  "sambhav",  "ं before भ (labial) -> m"),
-    ("संस्कृति", "saNskrTi", "ं before स (sibilant) -> N"),
+    ("संस्कृति", "saNskriTi", "ं before स (sibilant) -> N"),
     ("संज्ञ",  "sanygy",   "ं before ज (palatal) -> ny"),
     ("हंस",   "haNs",     "ं before स (sibilant) -> N"),
     ("कंठ",   "kantha",   "ं before ठ (retroflex) -> n"),

@@ -35,7 +35,7 @@ MATRA_TO_VOWEL = {
     "\u0940": "i:",   # ी  -> i:
     "\u0941": "u",    # ु  -> u
     "\u0942": "u:",   # ू  -> u:
-    "\u0943": "r~",   # ृ  -> r~ (tatsama)
+    "\u0943": "ri",   # ृ  -> ri (modern Nepali, was r~ Sanskrit vocalic r)
     "\u0947": "e",    # े  -> e
     "\u0948": "ai",   # ै  -> ai (the Sanskrit diphthong ऐ is ai in Nepali)
     "\u094b": "o",    # ो  -> o
@@ -50,7 +50,7 @@ INDEP_VOWEL = {
     "\u0908": "i:",  # ई
     "\u0909": "u",   # उ
     "\u090a": "u:",  # ऊ
-    "\u090b": "r~",  # ऋ
+    "\u090b": "ri",  # ऋ (modern Nepali)
     "\u090f": "e",   # ए
     "\u0910": "ai",  # ऐ (independent vowel, same as matra ै)
     "\u0913": "o",   # ओ (independent vowel, same as matra ो)
@@ -140,6 +140,16 @@ _NUM_COMPOUND_SUFFIXES = {
     "तीस", "चालीस", "पन्न", "सट्ठी", "हत्तर",
 }
 
+# General compound suffixes: common second elements of Nepali compounds
+# that trigger R7-style medial schwa deletion on the preceding stem.
+# (e.g. राज-मार्ग, समाज-वाद, भग-वान). These are NOT postpositions; they
+# are content words that commonly appear as second elements in compounds.
+# The set is curated to common patterns and may be extended as needed.
+_COMPOUND_SUFFIXES = {
+    "मार्ग", "कुमार", "वाद", "वान", "पति", "दर्शन",
+    "बहादुर", "कहानी", "वती", "धर्म", "भक्ति",
+}
+
 # Valid MEDIAL consonant clusters (C1 + C2) where the inherent /a/ of C1 is
 # deleted (the pair forms a single onset/cluster in Nepali). R7-general:
 # principled cluster inventory, not per-word. Currently covers the
@@ -175,13 +185,14 @@ _MATRA_NASAL_SET = set(MATRA_TO_VOWEL.keys()) | {ANUSVARA, CHANDRABINDU}
 
 
 def _ohala_internal_schwa(cps, i, join_idx=None):
-    """Internal schwa-deletion for native VC_CV clusters (Ohala-style).
+    """Internal schwa-deletion for native LIQUID coda clusters (Ohala-style).
 
-    A consonant at position i DROPS its inherent /a/ when it is preceded
-    by a vowel-full consonant (C1) and followed by another consonant (C3) which
-    itself is followed by a vowel. The medial /a/ is deleted (coda); the vowel
-    is the onset of C3. Applies to ALL consonants, not just liquids — the
-    original Ohala (1983) Hindi/Nepali rule: ə -> ∅ / VC_CV.
+    A liquid/glide (र/ल/व/य) at position i DROPS its inherent /a/ when it is
+    preceded by a vowel-bearing consonant (C1) and followed by another consonant
+    (C3) which itself is followed by a vowel. The liquid is a coda; the vowel
+    is the onset of C3. Per Ohala (1983) ə->∅ / VC_CV, but restricted to
+    liquids/glides per native Nepali validation — non-liquids do NOT trigger
+    this deletion (prevents over-deletion in कृपया, etc.).
 
     Native-compound (stem + suffix), native-confirmed:
         सरकार = स र कार -> sarkar   (स keeps /a/, र coda drops, का=long /a:/)
@@ -210,12 +221,16 @@ def _ohala_internal_schwa(cps, i, join_idx=None):
     n = len(cps)
     if i <= 0 or i >= n - 1:
         return False
+    # Only applies to LIQUID/GLIDE consonants (र, ल, व, य). Non-liquids like
+    # ज in राजमार्ग are handled via compound suffixes, not the Ohala rule.
+    if cps[i] not in _LIQUID_GLIDE:
+        return False
     # Only applies to consonants INSIDE the stem (before a compound join). A
     # suffix-initial liquid (e.g. व in वाला) must keep its /a/ as a peak.
     if join_idx is not None and join_idx >= 0 and i >= join_idx:
         return False
     # C1 = nearest base consonant BEFORE i (skip matras/nasals). e.g. in
-    # राज-मार्ग, C1 for ज is र (skip the matra ा at position i-1).
+    # राज-मार्ग, C1 for the liquid र is the consonant before it.
     _c1 = i - 1
     while _c1 >= 0 and (_is_matra(cps[_c1]) or cps[_c1] in (ANUSVARA, CHANDRABINDU)):
         _c1 -= 1
@@ -227,19 +242,14 @@ def _ohala_internal_schwa(cps, i, join_idx=None):
         j += 1
     if j >= n or not _is_consonant_base(cps[j]):
         return False  # liquid is immediately followed by its own vowel -> peak
-    # C3 must be vowel-bearing: the very next token after C3 must be a
-    # matra/indep vowel (explicit vowel), OR another live consonant (meaning
-    # C3 has inherent अ). This second case is what triggers deletion in
-    # compounds like राज-बहादुर (ज's schwa deleted before ब, which has
-    # inherent अ followed by ह). C3 at word-end does NOT trigger deletion
-    # (e.g. क-म-ल: the म keeps its /a/). Also within the same word unit
-    # (before any compound join).
+    # C3 must be IMMEDIATELY vowel-bearing: the very next token after C3 is a
+    # matra / independent vowel (no consonant between). And that vowel must lie
+    # within the same word unit (before any compound join). join_idx < 0 means
+    # no join (whole word), so the boundary restriction does not apply.
     k = j + 1
-    if k < n and (join_idx < 0 or k < join_idx):
-        if _is_matra(cps[k]) or cps[k] in INDEP_VOWEL:
-            return True   # explicit vowel on C3 (aa, i, u, e, o, ai, au)
-        if _is_consonant_base(cps[k]):
-            return True   # C3 has inherent अ (followed by another consonant)
+    if k < n and (join_idx < 0 or k < join_idx) and \
+            (_is_matra(cps[k]) or cps[k] in INDEP_VOWEL):
+        return True
     return False
 
 
@@ -442,6 +452,33 @@ def segment(word, tags=None):
                         continue  # try next suffix
                     join_idxs.add(_join)
                     host_drops[_join] = True  # prefix always drops in number compounds
+                    _remaining = _host
+                    matched = True
+                    break
+        if not matched:
+            # Check general compound suffixes (e.g. मार्ग, वाद). These trigger
+            # medial schwa deletion like number compounds but are not numbers.
+            for suf in sorted(_COMPOUND_SUFFIXES, key=len, reverse=True):
+                if _remaining.endswith(suf) and len(_remaining) > len(suf):
+                    _host = _remaining[:len(_remaining) - len(suf)]
+                    _join = -1
+                    for j in range(len(_host) - 1, -1, -1):
+                        if _is_consonant_base(_host[j]) and \
+                                (j + 1 >= len(_host) or _host[j + 1] != VI_RAMA):
+                            _join = j
+                            break
+                    if _join < 0:
+                        continue
+                    _suf_start = len(_host)
+                    _blocked = False
+                    for _k in range(_join + 1, _suf_start):
+                        if _host[_k] not in _MATRA_NASAL_SET:
+                            _blocked = True
+                            break
+                    if _blocked:
+                        continue
+                    join_idxs.add(_join)
+                    host_drops[_join] = True
                     _remaining = _host
                     matched = True
                     break
