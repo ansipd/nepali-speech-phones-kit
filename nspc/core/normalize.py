@@ -159,6 +159,7 @@ def _word_ends_in_dead(s):
 _VERB_FINAL_LAST = {"\u091b", "\u0930", "\u0928"}  # छ, र, न
 _EE_MATRA = "\u0947"   # े (ए matra)
 _EE_INDEP = "\u090f"   # ए (independent vowel)
+_EE_AI_MATRA = "\u0948" # ै (ऐ matra)
 _EE_AI_INDEP = "\u0910"  # ऐ (independent vowel)
 
 
@@ -182,11 +183,14 @@ def ends_in_verb_suffix(s):
     if cps[-2] == VI_RAMA and cps[-1] == "\u091b":
         return True
     # verb negative एन/ऐन: ए/े/ै + (न|र)  e.g. भएन, सुतएन
-    if cps[-2] in (_EE_MATRA, _EE_INDEP, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
+    if cps[-2] in (_EE_MATRA, _EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
         return True
     # infinitive उन (independent vowel उ + न) for words longer than साउन (4).
     # साउन is a month name (not a verb) and ends in the same characters.
     if n >= 5 and cps[-2] == "\u0909" and cps[-1] == "\u0928":
+        return True
+    # negative इन (independent vowel इ + न) e.g. होइन (hoina), पाइन
+    if n >= 3 and cps[-2] == "\u0907" and cps[-1] == "\u0928":
         return True
     return False
 
@@ -211,11 +215,14 @@ def verb_final_live(word):
     # live छ after a virama (न्+छ / त्+छ)
     if cps[-2] == VI_RAMA and cps[-1] == "\u091b":
         return True
-    # live न/र after ए (matra or independent vowel)  e.g. भएन
-    if cps[-2] in (_EE_MATRA, _EE_INDEP, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
+    # live न/र after ए/ऐ (matra or independent vowel)  e.g. भएन, छैन
+    if cps[-2] in (_EE_MATRA, _EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
         return True
     # infinitive उन (independent vowel उ + live न) for words longer than साउन (4)
     if n >= 5 and cps[-2] == "\u0909" and cps[-1] == "\u0928":
+        return True
+    # negative इन (independent vowel इ + live न) e.g. होइन (hoina)
+    if n >= 3 and cps[-2] == "\u0907" and cps[-1] == "\u0928":
         return True
     return False
 
