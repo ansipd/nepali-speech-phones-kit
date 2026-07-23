@@ -147,6 +147,8 @@ def u5(orth, tags):
     if tags.get("conjunct"):
         if tags.get("lneg") or orth in L_NEG:
             return ("C1-Lneg", False, "conjunct + L_neg (Newar/surname) -> DELETE")
+        if tags.get("foreign") and not tags.get("donor_schwa"):
+            return ("C5", False, "foreign loan ending in conjunct -> DELETE (donor)")
         return ("C1", True, "conjunct-final -> RETAIN (phonotactic)")
     if tags.get("verb_final_live"):
         # Native-speaker validated (R6.3b): verb forms ending in a LIVE

@@ -188,9 +188,10 @@ def ends_in_verb_suffix(s):
     # ए (U+090F) and ऐ (U+0910/U+0948) trigger verb-final detection.
     if cps[-2] in (_EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
         return True
-    # infinitive उन (independent vowel उ + न) for words longer than साउन (4).
-    # साउन is a month name (not a verb) and ends in the same characters.
-    if n >= 5 and cps[-2] == "\u0909" and cps[-1] == "\u0928":
+    # infinitive उन (independent vowel उ + न). Short verbs like आउन (3 cps)
+    # must still be caught; only exclude known non-verb nouns like साउन (month).
+    _NON_VERB_UN = {"साउन", "फागुन"}
+    if cps[-2] == "\u0909" and cps[-1] == "\u0928" and s not in _NON_VERB_UN:
         return True
     # negative इन (independent vowel इ + न) e.g. होइन (hoina), पाइन
     if n >= 3 and cps[-2] == "\u0907" and cps[-1] == "\u0928":
@@ -222,8 +223,10 @@ def verb_final_live(word):
     # NOTE: matra े (U+0947) excluded — see ends_in_verb_suffix for rationale.
     if cps[-2] in (_EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
         return True
-    # infinitive उन (independent vowel उ + live न) for words longer than साउन (4)
-    if n >= 5 and cps[-2] == "\u0909" and cps[-1] == "\u0928":
+    # infinitive उन (independent vowel उ + live न). Short verbs like आउन (3 cps)
+    # must still be caught; only exclude known non-verb nouns like साउन (month).
+    _NON_VERB_UN_LIVE = {"साउन", "फागुन"}
+    if cps[-2] == "\u0909" and cps[-1] == "\u0928" and word not in _NON_VERB_UN_LIVE:
         return True
     # negative इन (independent vowel इ + live न) e.g. होइन (hoina)
     if n >= 3 and cps[-2] == "\u0907" and cps[-1] == "\u0928":

@@ -113,6 +113,9 @@ class Lexicon:
             # foreign loan ending in a conjunct (र्क) -> delete final schwa (R8 / U5.C5)
             "पार्क":   {"tags": {"foreign": True, "donor_schwa": False},
                         "branch": "C5", "retain": False},
+            "इन्चार्ज": {"tags": {"foreign": True, "donor_schwa": False},
+                        "branch": "C5", "retain": False,
+                        "note": "English 'incharge' — conjunct-final loan"},
             # --- native-validated corrections (T6 listening review) ---------
             "यस":       {"tokens": ["y", "u", "s"], "branch": "C6",
                         "retain": True, "note": "yus (colloquial speech variant; spec R3.6 gives yas)"},
@@ -120,7 +123,7 @@ class Lexicon:
                         "retain": True, "note": "usle (monosyllabic pronoun host उस + ले join)"},
             "मञ्च":      {"tokens": ["m", "a", "n", "ch"], "branch": "C1",
                         "retain": False, "note": "manch (palatal nasal assimilation)"},
-            "अनलाइन":    {"tokens": ["a", "N", "l", "i", "N"], "branch": "C6",
+            "अनलाइन":    {"tokens": ["a", "N", "l", "a:", "i", "N"], "branch": "C6",
                         "retain": True, "note": "unline (English loan donor pronunciation)"},
             "हिँड्न":     {"tokens": ["h", "i~", "d", "n", "u"], "branch": "C0",
                         "retain": True,

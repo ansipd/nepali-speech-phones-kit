@@ -64,7 +64,7 @@ AUDIT = [
     ("सुख", ["s", "u", "kh", "a"], "C5b", "sukha (aspirated-final ख keeps अ)"),
     ("यस", ["y", "u", "s"], "C6", "yus (अ→u)"),
     ("उसले", ["u", "s", "l", "e"], "C6", "usle (medial schwa deleted)"),
-    ("अनलाइन", ["a", "N", "l", "i", "N"], "C6", "unline (medial schwas deleted)"),
+    ("अनलाइन", ["a", "N", "l", "a:", "i", "N"], "C6", "anlaain (online, loanword)"),
     ("हिँड्न", ["h", "i~", "d", "n", "u"], "C0", "hidnu (infinitive न् kept)"),
     # --- unit §12 anchors ---
     ("को", ["k", "o"], "C6", "simple word"),
