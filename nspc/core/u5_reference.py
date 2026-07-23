@@ -84,6 +84,12 @@ def _final_consonant_base(orth):
             return c
     return ""
 
+
+def _count_consonant_bases(orth):
+    """Count Devanagari consonant bases (U+0915-U+0939) in orth."""
+    return sum(1 for c in orth if "\u0915" <= c <= "\u0939")
+
+
 # ---------------------------------------------------------------------------
 # R1.3 NFC + R1.4 dead/live detection (minimal; full conjunct expansion in spec)
 # ---------------------------------------------------------------------------
@@ -168,18 +174,20 @@ def u5(orth, tags):
     if tags.get("foreign"):
         retain = bool(tags.get("donor_schwa"))
         return ("C5", retain, "foreign loan -> DONOR pronunciation")
-    # C5b — aspirated-final: a native word whose FINAL consonant is an aspirated
-    # stop/affricate (ख/घ/छ/झ/ठ/ढ/थ/ध/फ/भ) KEEPS its inherent /a/ (e.g. दुख ->
-    # dukha, सुख -> sukha). The breathy release is realized with a following
-    # vowel, so the final /a/ is not elided. Phonotactic class rule (not a word
-    # list); confirmed by native review on दुख/सुख.
-    # EXCEPTION: words in HALANTA_FINAL always DELETE (override C5b). This
-    # catches number words like आठ (a:th) where the number-word class overrides
-    # the aspirated-final retention rule.
+    # C5b — aspirated-final: ONLY for SHORT words (≤3 consonant bases) whose
+    # FINAL consonant is an aspirated stop/affricate (ख/घ/छ/झ/ठ/ढ/थ/ध/फ/भ).
+    # Short native words like दुख (dukha) and सुख (sukha) retain final /a/
+    # because the breathy release needs a vowel. LONGER words (≥4 consonant
+    # bases, e.g. लागुऔषध, वैशाख, सत्तारूढ) fall through to C6 DELETE since
+    # standard spoken Nepali deletes the final schwa on longer tatsama forms.
+    # Native-speaker confirmed on दुख/सुख.
     if orth in HALANTA_FINAL:
         pass  # fall through to C6 below, which applies HALANTA_FINAL
-    elif _final_consonant_base(orth) in _ASPIRATED:
-        return ("C5b", True, "final aspirated stop -> RETAIN inherent /a/")
+    elif _final_consonant_base(orth) in _ASPIRATED and \
+            len(orth) <= 4:
+        # Length ≤ 4 catches short native words like दुख/सुख (3 cps) but
+        # excludes longer tatsama borrowings like वैशाख (5 cps), लागुऔषध, etc.
+        return ("C5b", True, "short aspirated-final -> RETAIN inherent /a/")
     # C6 — DEFAULT native noun/adj/assimilated word ending in a LIVE consonant
     # (no virama, no conjunct): the inherent /a/ is DELETED (verified native:
     # nepal, ghar, pariwar, buddhiman, udyog, nirman, arthik, samajik, gayak,
