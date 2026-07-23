@@ -504,6 +504,16 @@ def segment(word, tags=None):
                 # NOT add the inherent 'a'. The matra is emitted in step 4.
                 i += 1
                 continue
+            if nxt is not None and nxt in INDEP_VOWEL:
+                # Independent vowels अ (U+0905), आ (U+0906), इ (U+0907),
+                # ई (U+0908), उ (U+0909), ऊ (U+090A), ऋ (U+090B) REPLACE
+                # the consonant's inherent /a/ (e.g. भ+इ+न् -> bhin; न+अ -> n).
+                # ए/ऐ/ओ/ औ (U+090F/U+0910/U+0913/U+0914) form separate
+                # syllables (e.g. भ+ए+को -> bhaeko).
+                if nxt in ("\u0905", "\u0906", "\u0907", "\u0908",
+                           "\u0909", "\u090a", "\u090b"):
+                    i += 1
+                    continue
             # live consonant with inherent /a/ UNLESS it is the FINAL consonant
             # and U5 decided DELETE (C6/C0/C1-Lneg), OR it is the host-final
             # consonant at a compound join (R7), OR it forms a medial cluster
