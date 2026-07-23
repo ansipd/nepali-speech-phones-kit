@@ -48,7 +48,7 @@ _NUM_UNITS = {"लाख", "करोड", "अर्ब", "खर्ब"}
 # Tatsama words that, despite being Sanskrit-derived (which normally retains
 # surface /a/), are nativized with a deleted final /a/ (e.g. देश -> deś, not
 # deśa). Confirmed by native-speaker review. Add others ONLY with confirmation.
-TATSAMA_DELETE = {"देश"}
+TATSAMA_DELETE = {"देश", "औषध"}
 
 # Native words that, against the C6 DELETE default, KEEP the final inherent /a/
 # (verified native-speaker review). These are idiosyncratic and must be added
@@ -181,8 +181,8 @@ def u5(orth, tags):
     # bases, e.g. लागुऔषध, वैशाख, सत्तारूढ) fall through to C6 DELETE since
     # standard spoken Nepali deletes the final schwa on longer tatsama forms.
     # Native-speaker confirmed on दुख/सुख.
-    if orth in HALANTA_FINAL:
-        pass  # fall through to C6 below, which applies HALANTA_FINAL
+    if orth in HALANTA_FINAL or orth in TATSAMA_DELETE:
+        pass  # fall through to C6 below (HALANTA_FINAL or tatsama delete)
     elif _final_consonant_base(orth) in _ASPIRATED and \
             len(orth) <= 4:
         # Length ≤ 4 catches short native words like दुख/सुख (3 cps) but
