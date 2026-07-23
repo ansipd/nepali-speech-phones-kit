@@ -175,12 +175,13 @@ _MATRA_NASAL_SET = set(MATRA_TO_VOWEL.keys()) | {ANUSVARA, CHANDRABINDU}
 
 
 def _ohala_internal_schwa(cps, i, join_idx=None):
-    """Internal schwa-deletion for native C1-LIQUID-C3-V clusters (Ohala-style).
+    """Internal schwa-deletion for native VC_CV clusters (Ohala-style).
 
-    A live consonant at position i DROPS its inherent /a/ when it is a
-    liquid/glide (र/ल/व/य) that sits in the MIDDLE of a cluster: it is preceded
-    by a consonant (C1) and followed by another consonant (C3) which itself is
-    followed by a vowel. The liquid is a coda; the vowel is the onset of C3.
+    A consonant at position i DROPS its inherent /a/ when it is preceded
+    by a vowel-full consonant (C1) and followed by another consonant (C3) which
+    itself is followed by a vowel. The medial /a/ is deleted (coda); the vowel
+    is the onset of C3. Applies to ALL consonants, not just liquids — the
+    original Ohala (1983) Hindi/Nepali rule: ə -> ∅ / VC_CV.
 
     Native-compound (stem + suffix), native-confirmed:
         सरकार = स र कार -> sarkar   (स keeps /a/, र coda drops, का=long /a:/)
@@ -213,10 +214,12 @@ def _ohala_internal_schwa(cps, i, join_idx=None):
     # suffix-initial liquid (e.g. व in वाला) must keep its /a/ as a peak.
     if join_idx is not None and join_idx >= 0 and i >= join_idx:
         return False
-    if cps[i] not in _LIQUID_GLIDE:
-        return False
-    # preceding token must be a consonant (C1)
-    if not _is_consonant_base(cps[i - 1]):
+    # C1 = nearest base consonant BEFORE i (skip matras/nasals). e.g. in
+    # राज-मार्ग, C1 for ज is र (skip the matra ा at position i-1).
+    _c1 = i - 1
+    while _c1 >= 0 and (_is_matra(cps[_c1]) or cps[_c1] in (ANUSVARA, CHANDRABINDU)):
+        _c1 -= 1
+    if _c1 < 0 or not _is_consonant_base(cps[_c1]):
         return False
     # find C3 = next base consonant after i (skip matras/nasals on the liquid)
     j = i + 1
@@ -224,14 +227,19 @@ def _ohala_internal_schwa(cps, i, join_idx=None):
         j += 1
     if j >= n or not _is_consonant_base(cps[j]):
         return False  # liquid is immediately followed by its own vowel -> peak
-    # C3 must be IMMEDIATELY vowel-bearing: the very next token after C3 is a
-    # matra / independent vowel (no consonant between). And that vowel must lie
-    # within the same word unit (before any compound join). join_idx < 0 means
-    # no join (whole word), so the boundary restriction does not apply.
+    # C3 must be vowel-bearing: the very next token after C3 must be a
+    # matra/indep vowel (explicit vowel), OR another live consonant (meaning
+    # C3 has inherent अ). This second case is what triggers deletion in
+    # compounds like राज-बहादुर (ज's schwa deleted before ब, which has
+    # inherent अ followed by ह). C3 at word-end does NOT trigger deletion
+    # (e.g. क-म-ल: the म keeps its /a/). Also within the same word unit
+    # (before any compound join).
     k = j + 1
-    if k < n and (join_idx < 0 or k < join_idx) and \
-            (_is_matra(cps[k]) or cps[k] in INDEP_VOWEL):
-        return True
+    if k < n and (join_idx < 0 or k < join_idx):
+        if _is_matra(cps[k]) or cps[k] in INDEP_VOWEL:
+            return True   # explicit vowel on C3 (aa, i, u, e, o, ai, au)
+        if _is_consonant_base(cps[k]):
+            return True   # C3 has inherent अ (followed by another consonant)
     return False
 
 
