@@ -348,11 +348,15 @@ def segment(word, tags=None):
         for suf in sorted(_POSTPOS_SET, key=len, reverse=True):
             if _remaining.endswith(suf) and len(_remaining) > len(suf):
                 _host = _remaining[:len(_remaining) - len(suf)]
+                _join = -1
                 for j in range(len(_host) - 1, -1, -1):
                     if _is_consonant_base(_host[j]) and \
                             (j + 1 >= len(_host) or _host[j + 1] != VI_RAMA):
                         _join = j
                         break
+                if _join < 0:
+                    matched = False
+                    break  # no consonant found in host, skip
                 # Block the join if an independent vowel sits between the
                 # consonant and the suffix (e.g. भए + को -> भएको: ए between
                 # भ and को means no schwa deletion on भ).
@@ -420,11 +424,14 @@ def segment(word, tags=None):
             for suf in sorted(_NUM_COMPOUND_SUFFIXES, key=len, reverse=True):
                 if _remaining.endswith(suf) and len(_remaining) > len(suf):
                     _host = _remaining[:len(_remaining) - len(suf)]
+                    _join = -1
                     for j in range(len(_host) - 1, -1, -1):
                         if _is_consonant_base(_host[j]) and \
                                 (j + 1 >= len(_host) or _host[j + 1] != VI_RAMA):
                             _join = j
                             break
+                    if _join < 0:
+                        continue  # no consonant in host, try next suffix
                     _suf_start = len(_host)
                     _blocked = False
                     for _k in range(_join + 1, _suf_start):
