@@ -38,6 +38,12 @@ _POSTPOSITIONS = {
 # native-speaker review. Add others ONLY with native confirmation.
 HALANTA_FINAL = {"नेपाल", "प्रधान", "घर", "कमल", "आठ"}
 
+# Number-unit words: lakh, arab, kharab, etc. These are number names used as
+# standalone words and should ALWAYS delete final /a/ (C6 default), regardless
+# of their final consonant class (aspirated, conjunct, etc.). They bypass C5b
+# and C1 in the U5 priority order.
+_NUM_UNITS = {"लाख", "करोड", "अर्ब", "खर्ब"}
+
 # Tatsama words that, despite being Sanskrit-derived (which normally retains
 # surface /a/), are nativized with a deleted final /a/ (e.g. देश -> deś, not
 # deśa). Confirmed by native-speaker review. Add others ONLY with confirmation.
@@ -126,6 +132,11 @@ def u5(orth, tags):
     # subsumes the prior curated override for म -> ma.
     if tags.get("halo"):
         return ("C-HALO", True, "single live consonant -> RETAIN inherent /a/")
+    # Number-unit words (लाख, अर्ब, करोड, etc.) always DELETE final /a/.
+    # This must fire before C1 (conjunct) and C5b (aspirated) so number words
+    # do not incorrectly retain final /a/ through either of those rules.
+    if orth in _NUM_UNITS:
+        return ("C6-N", False, "number unit -> DELETE final /a/ (C6 default)")
     if tags.get("conjunct"):
         if tags.get("lneg") or orth in L_NEG:
             return ("C1-Lneg", False, "conjunct + L_neg (Newar/surname) -> DELETE")
