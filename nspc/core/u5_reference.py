@@ -31,6 +31,7 @@ _POSTPOSITIONS = {
     "हरू", "हरु", "सँग", "तिर", "बाट", "मा", "ले", "को", "का", "पनि", "सित",
     "पटक", "पल्ट", "पति", "बिना", "लाई",
     "कै", "भित्र",
+    "देखि", "तर्फ", "विरुद्ध", "अनुसार",
 }
 
 # Traditional HALANTA words: written without a virama yet pronounced WITHOUT

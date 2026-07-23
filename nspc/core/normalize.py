@@ -182,8 +182,11 @@ def ends_in_verb_suffix(s):
     # verb ending छ after a virama: न्+छ / त्+छ (भन्छ, सुत्छ, हुन्छ)
     if cps[-2] == VI_RAMA and cps[-1] == "\u091b":
         return True
-    # verb negative एन/ऐन: ए/े/ै + (न|र)  e.g. भएन, सुतएन
-    if cps[-2] in (_EE_MATRA, _EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
+    # verb negative एन/ऐन: ए/ै (INDEPENDENT vowel only) + (न|र)  e.g. भएन, सुतएन
+    # NOTE: matra े (U+0947) is intentionally excluded to avoid mistagging
+    # proper names like बालेन (बा+ले+न) as verbs. Only independent vowels
+    # ए (U+090F) and ऐ (U+0910/U+0948) trigger verb-final detection.
+    if cps[-2] in (_EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
         return True
     # infinitive उन (independent vowel उ + न) for words longer than साउन (4).
     # साउन is a month name (not a verb) and ends in the same characters.
@@ -215,8 +218,9 @@ def verb_final_live(word):
     # live छ after a virama (न्+छ / त्+छ)
     if cps[-2] == VI_RAMA and cps[-1] == "\u091b":
         return True
-    # live न/र after ए/ऐ (matra or independent vowel)  e.g. भएन, छैन
-    if cps[-2] in (_EE_MATRA, _EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
+    # live न/र after ए/ऐ (independent vowel only)  e.g. भएन, छैन
+    # NOTE: matra े (U+0947) excluded — see ends_in_verb_suffix for rationale.
+    if cps[-2] in (_EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
         return True
     # infinitive उन (independent vowel उ + live न) for words longer than साउन (4)
     if n >= 5 and cps[-2] == "\u0909" and cps[-1] == "\u0928":
