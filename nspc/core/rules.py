@@ -164,18 +164,11 @@ _STOP = {"\u0915", "\u0916", "\u0917", "\u0918",  # क ख ग घ
          "\u092a", "\u092b", "\u092c", "\u092d"}  # प फ ब भ
 
 
-def _medial_cluster(c1, c2):
-    """True if C1 + C2 forms a valid medial cluster (delete C1's schwa).
-
-    NOTE: a blanket 'fricative + stop' rule was REMOVED. Conjuncts are written
-    with an explicit virama (e.g. स्क = स्+क) and handled by CLUSTER_MAP; a bare
-    fricative+stop sequence without virama is NOT a native cluster (e.g. the
-    foreign name शकिरा = sha-ki-ra, श keeps its inherent /a/). Native post-स
-    words (आकाशको, देशबाट, ...) keep their fricative's /a/ via the host-final
-    path, not this rule.
-    """
-    return False
-
+# NOTE: the former _medial_cluster() blanket 'fricative + stop' rule was REMOVED.
+# Conjuncts are written with an explicit virama (e.g. स्क = स्+क) and handled by
+# CLUSTER_MAP; a bare fricative+stop sequence without virama is NOT a native
+# cluster (e.g. शकिरा = sha-ki-ra, श keeps its inherent /a/). Native post-स
+# words (आकाशको, देशबाट, ...) keep their fricative's /a/ via the host-final path.
 
 # Liquids / glides as MEDIAL CODAS: in native compounds C1-liquid-V the liquid
 # (र/ल/व/य) is a coda and DROPS its inherent /a/; the vowel belongs to the next

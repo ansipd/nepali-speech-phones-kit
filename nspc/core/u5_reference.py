@@ -20,19 +20,12 @@ import unicodedata
 
 L_NEG = {"मञ्च", "गञ्ज", "पन्त"}
 
-# Postpositions / derivational suffixes (नामयोगी / सम्बन्धवाचक) are never
-# pronounced in isolation; they always attach to a preceding host and KEEP
-# their final inherent /a/ (e.g. सँग -> "saga", not "sag"; तिर -> "Tira",
-# not "Tir). They are exempt from the C6 final-schwa DELETE that applies to
-# bare native nouns (R7). A word ending in one of these (and longer than it)
-# therefore RETAINs its final /a/.
-_POSTPOSITIONS = {
-    "जस्तै", "आदि", "वाला", "दार", "सँगै", "पछि", "अघि", "भरि", "सम्म",
-    "हरू", "हरु", "सँग", "तिर", "बाट", "मा", "ले", "को", "का", "पनि", "सित",
-    "पटक", "पल्ट", "पति", "बिना", "लाई",
-    "कै", "भित्र",
-    "देखि", "तर्फ", "विरुद्ध",
-}
+# Postposition inventory imported from rules.py (single authoritative source).
+# A word ending in one of these (and longer than the suffix) is classified as
+# C6-P: the SUFFIX keeps its own final inherent /a/; the HOST's final /a/ is
+# deleted at the join (R7).
+from .rules import _POSTPOSITIONS as _RULES_POSTPOSITIONS
+_POSTPOSITIONS = set(_RULES_POSTPOSITIONS)
 
 # Traditional HALANTA words: written without a virama yet pronounced WITHOUT
 # the final inherent /a/ (exception to the C6 RETAIN default). Confirmed by
