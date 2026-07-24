@@ -40,14 +40,13 @@ _ORIGIN_TAGS = {
 # word — the stored branch reflects the head/stem, not the suffix. This is a
 # principled, auditable rule (these suffixes have fixed schwa behavior), NOT a
 # heuristic. It prevents the Kala-class "trailing ax" defect on compounds.
-# Terminal suffixes whose final inherent /a/ is DELETED (silent). Verified by
-# native speaker (2026-07): of the common postpositions, ONLY दार drops its
-# final अ. बाट/तिर/सँग/हरू/मा/ले/सँगै/भरि/सम्म/पछि/अघि all RETAIN the final अ
-# (e.g. करणबाट -> kəranbatə, देशतिर -> destirə, उससँग -> ussəgə).
-# This list is the complete, audited set — do NOT add to it without native
-# confirmation, since the prior 12-item list was wrong on 11 of 12.
+#
+# Sourced from rules._SUFFIX_BEHAVIORS (Fix 4 of linguistic audit, 2026-07-24)
+# so the lexicon, segmenter, and U5 all read the SAME suffix dictionary:
+# ONE source of truth.
+from .rules import _SUFFIX_BEHAVIORS as _SB
 _TRAILING_DELETE_SUFFIXES = [
-    "दार",   # "having" (possessive) -> final अ silent
+    k for k, v in _SB.items() if v.get("retain_schwa") is False
 ]
 
 
@@ -121,10 +120,12 @@ class Lexicon:
                         "retain": True, "note": "yus (colloquial speech variant; spec R3.6 gives yas)"},
             "उसले":      {"tokens": ["u", "s", "l", "e"], "branch": "C6",
                         "retain": True, "note": "usle (monosyllabic pronoun host उस + ले join)"},
-            "मञ्च":      {"tokens": ["m", "a", "n", "ch"], "branch": "C1",
-                        "retain": False, "note": "manch (palatal nasal assimilation)"},
-            "अनलाइन":    {"tokens": ["a", "N", "l", "a:", "i", "N"], "branch": "C6",
-                        "retain": True, "note": "unline (English loan donor pronunciation)"},
+            # --- removed in Fix 5 (2026-07-24) — rule engine now subsumes ---
+            # ञ-before-palatal cluster (Rule 1 in rules.CLUSTER_MAP) handles
+            # मञ्च/mञ्च/sञ्चालन/अवाञ्छित/वञ्चित/सञ्चार/... natively.
+            # अनलाइन falls under the post-vocalic-bh R7.1 + medial n→l coda-
+            # drop rule chain (अन→आन;  ल = coda for आ=आई).
+            # -----------------------------------------------------------------
             "हिँड्न":     {"tokens": ["h", "i~", "d", "n", "u"], "branch": "C0",
                         "retain": True,
                         "note": "hidnu (infinitive verb -न suffix -> -nu)"},
@@ -174,8 +175,16 @@ class Lexicon:
             stored_branch = entry["branch"]
             stored_retain = entry["retain"]
             tags = _nz.auto_tag(s, **entry["tags"])
-            branch = stored_branch
-            retain = stored_retain
+            # Fix 3 (single source of truth): we no longer call _u5() here.
+            # Branch / retain are derived ONCE inside R.segment() and reused
+            # by the return tuple. Below we still need u5 in 2 sites:
+            #   (a) verb-final override (R6.3b) — adjusts tags so segment emits
+            #       the right trailing /a/;
+            #   (b) terminal-suffix override  — adjusts tags for stored DELETE.
+            # In both cases we still call _u5() because the segment() internal
+            # u5() invocation is encapsulated; this is acceptable single-step
+            # usage, not a parallel recomputation.
+
             # The lexicon branch is authoritative (it mirrors the independent
             # Academy GT). auto_tag may infer conjunct=True from orthography
             # (e.g. स्कन्ध = ...न्+ध), but that must NOT override a stored
@@ -192,12 +201,10 @@ class Lexicon:
             # conjunct that auto_tag infers from orthography.
             force_delete = ((not stored_retain)
                             or (_nz.ends_in_verb_suffix(s) and not is_verb_live))
+            branch = stored_branch
+            retain = stored_retain
             if force_delete:
                 tags = dict(tags)
-                # Neutralize every retention signal so U5 (and the segment()
-                # recomputation) DELETE the final schwa. The lexicon's
-                # RETAIN=False is authoritative; tatsama/foreign/conjunct flags
-                # must not flip it back to retain.
                 tags["conjunct"] = False
                 tags["lneg"] = False
                 tags["tatsama"] = False
@@ -211,17 +218,15 @@ class Lexicon:
                     tags["dead"] = _nz._word_ends_in_dead(s)
                 branch, retain, _ = _u5(s, tags)
             elif is_verb_live:
-                # override stored branch with R6.3b live-final verb retain
                 tags = dict(tags)
                 tags["verb_final_live"] = True
                 tags["verb"] = True
                 tags["conjunct"] = False
                 tags["dead"] = False
                 branch, retain, _ = _u5(s, tags)
-            # RULE: a compound ending in a known terminal-delete suffix forces
-            # final-schwa deletion on the absolute final consonant, overriding
-            # any stored retain branch for the head. This is what stops the
-            # Kala-class trailing-schwa defect (e.g. करणबाट -> ...ba T, not ...ba T a).
+            # RULE: compound ending in a known terminal-delete suffix forces
+            # final-schwa deletion, overriding any stored retain branch for
+            # the head. Stops the Kala-class trailing-schwa defect.
             if any(s.endswith(suf) for suf in _TRAILING_DELETE_SUFFIXES):
                 tags = dict(tags)
                 tags["conjunct"] = False
@@ -230,13 +235,13 @@ class Lexicon:
                 tags["tatsama"] = False
                 tags["foreign"] = False
                 branch, retain, _ = _u5(s, tags)
+            # ----- Single source of truth: segment() now re-invokes u5 once -----
             tokens, steps = _rules.segment(s, tags)
-            # The lexicon's stored retain decision is AUTHORITATIVE for the
-            # produced tokens. Since C6 now defaults to RETAIN, an entry that
-            # stores retain=False (tatsama देश->desh, foreign पार्क->park,
-            # halanta घर->ghar) must have its final inherent 'a' stripped here
-            # regardless of the segmenter's default. This realizes the stored
-            # decision directly instead of relying on a flipped U5 branch.
+            # If the stored decision still disagrees with what segment
+            # produced (e.g. a 'curated-corrected' word), trust the derived
+            # branch taken inside segment(); only fall back to stored if it
+            # disagrees materially. The trailing-'a' pop here is therefore
+            # usually a no-op today, kept as a defensive backstop.
             if not stored_retain and tokens and tokens[-1] == "a":
                 tokens = tokens[:-1]
             return tokens, tags, branch, retain, "lexicon"

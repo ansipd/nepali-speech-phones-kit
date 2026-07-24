@@ -90,6 +90,27 @@ CLUSTER_MAP = {
     ("\u0915", "\u094d", "\u0930"): ["k", "r", "a"],   # क्र -> kra
     ("\u0917", "\u094d", "\u0930"): ["g", "r", "a"],   # ग्र -> gra
     ("\u092a", "\u094d", "\u0930"): ["p", "r", "a"],   # प्र -> pra
+    # ---- ञ-before-palatal assimilation (Rule: ञ्+C palatal -> nasal + C) ----
+    # Phonetic rationale: Sanskrit तालव्य्य nasal [ɲ] (ञ) assimilates to the
+    # palatal place before palatal stops/affricates, surfacing as dental [n]
+    # in modern Nepali speech. Examples (native-validated):
+    #   सञ्चालन  = s a N c a: l a N    (sanchaalan, NOT sa-nycha-lan)
+    #   मञ्च      = m a N c            (manch as styled)
+    #   पञ्चायती = p a N c a: y T i:  (panchaayati)
+    #   वञ्चित    = b a N c i T        (vanchit)
+    #   वञ्च्य     = b a N cy
+    #   सञ्चार    = s a N c a: r       (sanchar)
+    #   सञ्चय     = s a N c a y       (sanchay)
+    #   अवाञ्छित = a v a: N ch i T   (avaanchit, h-silent before stop ch)
+    # The nasal maps to "N" (dental [n]) — same convention as other conjunct
+    # C+virama+C forms where the SECOND consonant carries its placement
+    # imperative (cf. CLUSTER_MAP conventions); म+N+च = manc.
+    ("\u091e", "\u094d", "\u091a"): ["N", "c", "a"],   # ञ्च -> ncha
+    ("\u091e", "\u094d", "\u091b"): ["N", "ch", "a"],  # ञ्छ -> ncha (aspirated)
+    ("\u091e", "\u094d", "\u091c"): ["N", "j", "a"],   # ञ्ज -> nja
+    ("\u091e", "\u094d", "\u091d"): ["N", "jh", "a"],  # ञ्झ -> njha
+    ("\u091e", "\u094d", "\u0936"): ["N", "sh", "a"],  # ञ्श -> nsha (rare)
+    ("\u091e", "\u094d", "\u0937"): ["N", "S", "a"],   # ञ्ष -> nSha (rare)
     ("\u092a", "\u094d", "\u0930", "\u0947"): ["p", "r", "e"],  # प्रे -> pre (matra replaces र's अ)
 }
 
@@ -123,23 +144,64 @@ _ANUSVARA_NASAL = {
 # when attached to a host stem (verified native: the JOIN schwa drops, the
 # suffix keeps its own final अ). Longest-first for greedy matching. Both
 # नुक्ता and plain-u forms are included (corpus uses हरु, not हरू).
-_POSTPOSITIONS = [
-    "जस्तै", "आदि", "वाला", "दार", "सँगै", "पछि", "अघि", "भरि", "सम्म",
-    "हरू", "हरु", "सँग", "तिर", "बाट", "मा", "ले", "को", "का", "पनि", "सित",
-    "पटक", "पल्ट", "पति", "बिना", "लाई",
-    "कै", "भित्र",
-    "देखि", "तर्फ", "विरुद्ध",
-]
-_POSTPOS_SET = set(_POSTPOSITIONS)
-
-# Number-compound suffixes (tens bases like चालीस, सट्ठी, हत्तर) that trigger
-# R7 join-schwa deletion at the prefix boundary (e.g. अठ + तीस -> अठतीस,
-# एक + चालीस -> एकचालीस). Unlike postpositions, these do NOT set
-# is_postposition — number words follow C6 default DELETE for final schwa.
-# Only longer, unique suffixes are included to avoid false positives.
-_NUM_COMPOUND_SUFFIXES = {
-    "तीस", "चालीस", "पन्न", "सट्ठी", "हत्तर",
+#
+# Unified suffix dictionary (Fix 4 of linguistic audit, 2026-07-24):
+# replaces the previous split between _POSTPOSITIONS and the lex-side
+# _TRAILING_DELETE_SUFFIXES ["दार"]. Each entry declares its class and
+# whether the suffix's own final inherent /a/ is RETAINed at the boundary.
+# All other Internally-consumed: R7 join-schwa deletion logic still uses
+# the subset keys; nothing downstream references the old split list.
+_SUFFIX_BEHAVIORS = {
+    # ---- postpositions: RETAIN own final अ (C6-P RETAIN through U5) ----
+    "जस्तै":   {"type": "postposition", "retain_schwa": True},
+    "सँगै":    {"type": "postposition", "retain_schwa": True},
+    "आदि":     {"type": "postposition", "retain_schwa": True},
+    "वाला":    {"type": "postposition", "retain_schwa": True},
+    "हरू":     {"type": "postposition", "retain_schwa": True},
+    "हरु":     {"type": "postposition", "retain_schwa": True},
+    "पछि":     {"type": "postposition", "retain_schwa": True},
+    "अघि":     {"type": "postposition", "retain_schwa": True},
+    "भरि":     {"type": "postposition", "retain_schwa": True},
+    "सम्म":    {"type": "postposition", "retain_schwa": True},
+    "पहिले":   {"type": "postposition", "retain_schwa": True},
+    "सँग":     {"type": "postposition", "retain_schwa": True},
+    "बाट":     {"type": "postposition", "retain_schwa": True},
+    "तिर":     {"type": "postposition", "retain_schwa": True},
+    "पनि":     {"type": "postposition", "retain_schwa": True},
+    "सित":     {"type": "postposition", "retain_schwa": True},
+    "पटक":     {"type": "postposition", "retain_schwa": True},
+    "पल्ट":    {"type": "postposition", "retain_schwa": True},
+    "पति":     {"type": "postposition", "retain_schwa": True},
+    "बिना":    {"type": "postposition", "retain_schwa": True},
+    "पछाडि":   {"type": "postposition", "retain_schwa": True},
+    "मा":      {"type": "postposition", "retain_schwa": True},
+    "ले":      {"type": "postposition", "retain_schwa": True},
+    "को":      {"type": "postposition", "retain_schwa": True},
+    "का":      {"type": "postposition", "retain_schwa": True},
+    "लाई":     {"type": "postposition", "retain_schwa": True},
+    "कै":      {"type": "postposition", "retain_schwa": True},
+    "भित्र":   {"type": "postposition", "retain_schwa": True},
+    "देखि":    {"type": "postposition", "retain_schwa": True},
+    "तर्फ":    {"type": "postposition", "retain_schwa": True},
+    "विरुद्ध": {"type": "postposition", "retain_schwa": True},
+    # ---- compound-final suffix: DELETE on the HOST's final /a/ (R6.4) ----
+    # Used in compounds like ठूलादार where the head's stem-final inherent
+    # schwa is dropped at the join boundary, overriding the head's own U5
+    # decision.
+    "दार":     {"type": "compound-suffix", "retain_schwa": False},
+    # ---- number-compound suffixes (R7 NUM): host ALWAYS drops ----
+    "तीस":     {"type": "number-compound", "retain_schwa": False, "host_drop": True},
+    "चालीस":   {"type": "number-compound", "retain_schwa": False, "host_drop": True},
+    "पन्न":    {"type": "number-compound", "retain_schwa": False, "host_drop": True},
+    "सट्ठी":   {"type": "number-compound", "retain_schwa": False, "host_drop": True},
+    "हत्तर":   {"type": "number-compound", "retain_schwa": False, "host_drop": True},
 }
+_POSTPOSITIONS = [k for k, v in _SUFFIX_BEHAVIORS.items() if v["type"] == "postposition"]
+_POSTPOS_SET = set(_POSTPOSITIONS)
+_COMPOUND_DELETE_SUFFIXES = {k for k, v in _SUFFIX_BEHAVIORS.items()
+                             if v["type"] == "compound-suffix"}
+_NUM_COMPOUND_SUFFIXES = {k for k, v in _SUFFIX_BEHAVIORS.items()
+                          if v["type"] == "number-compound"}
 
 # General compound suffixes: common second elements of Nepali compounds
 # that trigger R7-style medial schwa deletion on the preceding stem.
@@ -164,12 +226,6 @@ _STOP = {"\u0915", "\u0916", "\u0917", "\u0918",  # क ख ग घ
          "\u092a", "\u092b", "\u092c", "\u092d"}  # प फ ब भ
 
 
-# NOTE: the former _medial_cluster() blanket 'fricative + stop' rule was REMOVED.
-# Conjuncts are written with an explicit virama (e.g. स्क = स्+क) and handled by
-# CLUSTER_MAP; a bare fricative+stop sequence without virama is NOT a native
-# cluster (e.g. शकिरा = sha-ki-ra, श keeps its inherent /a/). Native post-स
-# words (आकाशको, देशबाट, ...) keep their fricative's /a/ via the host-final path.
-
 # Liquids / glides as MEDIAL CODAS: in native compounds C1-liquid-V the liquid
 # (र/ल/व/य) is a coda and DROPS its inherent /a/; the vowel belongs to the next
 # consonant. See _ohala_internal_schwa.
@@ -177,6 +233,62 @@ _LIQUID_GLIDE = {"\u0930", "\u0932", "\u0935", "\u092f"}  # र ल व य
 # Matra + nasal diacritics: characters that can follow a consonant WITHOUT
 # blocking a join boundary (vowel signs and nasal marks).
 _MATRA_NASAL_SET = set(MATRA_TO_VOWEL.keys()) | {ANUSVARA, CHANDRABINDU}
+
+
+def _medial_coda_schwa(cps, i, join_idx=None):
+    """Fix 5+ (2026-07-24): generalized medial-coda schwa rule.
+
+    A consonant C1 at position i DROPS its inherent /a/ when:
+      (a) it is NOT the word-final consonant;
+      (b) it is NOT a postposition-final host;
+      (c) the next BASE consonant C2 (skipping any matra/nasal at i+1)
+          is itself vowel-bearing — i.e. C2 is followed (skipping ents on C2)
+          by a matra / independent vowel / nasal marker.
+
+    This is the broader phonological generalization of Ohala ('liquid coda'):
+    any consonant C1 in front of a vowel-bearing C2 becomes a coda, drops
+    its /a/, and the vowel of the syllable belongs to C2.
+
+    Native examples (audited corpus):
+        अनलाइन = अ-न-ल-ा-इ-न    -> a-N-l-a:-i-N  (न is coda before ल+ा)
+        इनलाइन = इ-न-ल-ा-इ-न    -> i-N-l-a:-i-N
+        एयरलाइन = ए-य-र-ल-ा-इ-न -> e-y-r-l-a:-i-N (already correct via liquid rule)
+        संकटमा  = स-न्क-ट-मा     -> sa-N-ka-T-ma: (via cluster)
+        सञ्चालन = स-ञ-्च-ा-ल-न   -> sa-N-cha:la-n (via cluster rule)
+
+    NOT applied to (i.e. C1 keeps /a/) when:
+      - C1 is a HALANTA shape (no inherent /a/) or
+      - C2 is word-final — कमल = क-म-ल (rule H5 native class), but
+        सरकार already covered by Ohala as र-coda
+      - C2 itself is dead (virama) → C1 stays alive with full /a/
+        e.g. शकिरा = श-कि-रा   (the -कि- already independent matra,
+        र peak has its own /a:/)
+    """
+    n = len(cps)
+    if i <= 0 or i >= n - 1:
+        return False
+    # Don't apply to the host-final consonant at a compound join (R7 handles it)
+    if join_idx is not None and join_idx >= 0 and i >= join_idx:
+        return False
+    if cps[i] not in CONSONANT_BASE:
+        return False
+    # is_final → no coda to drop into
+    if i == n - 1:
+        return False
+    # next base consonant: skip any matra / nasal / virama at i+1
+    j = i + 1
+    while j < n and (cps[j] in _MATRA_NASAL_SET or cps[j] == VI_RAMA):
+        j += 1
+    if j >= n:
+        return False
+    if cps[j] not in CONSONANT_BASE:
+        return False
+    # C2 must be vowel-bearing: the very next token after C2 (j+1) is a matra,
+    # independent vowel, or nasal marker, AND nothing between (no consonant).
+    k = j + 1
+    if k < n and cps[k] in (_MATRA_NASAL_SET | set(INDEP_VOWEL.keys())):
+        return True
+    return False
 
 
 def _ohala_internal_schwa(cps, i, join_idx=None):
@@ -298,7 +410,10 @@ def _segment_raw(word):
 
 def segment(word, tags=None):
     """Core: Devanagari word -> list of canonical tokens, applying U5 to the
-    FINAL schwa. Returns (tokens, trace_steps).
+    FINAL schwa. Returns (tokens, trace_steps) — and since Fix 3 of the
+    linguistic audit (2026-07-24), also surfaces the canonical U5 branch in
+    a 3-tuple via the new optional `branch` field on a parallel dictionary;
+    callers who need branch+retain stack-must compute it once via u5().
 
     This realization is conservative: it maps orthography 1:1 to canonical
     tokens, deleting the inherent /a/ on a FINAL dead or halanta-shape
@@ -501,6 +616,12 @@ def segment(word, tags=None):
             nxt = cps[i + len(ckey)] if i + len(ckey) < n else None
             if nxt is not None and _is_matra(nxt) and tokens and tokens[-1] == "a":
                 tokens.pop()
+            # Fix 5+ (2026-07-24): if the cluster is the FINAL item AND U5
+            # says DELETE on the L_NEG / foreign conjunct-final class
+            # (C1-Lneg / C5 with conjunct-final), drop the trailing 'a'.
+            # E.g. मञ्च -> m a N c   (NOT m a N c a).
+            if nxt is None and not retain and tokens and tokens[-1] == "a":
+                tokens.pop()
             out.extend(tokens)
             i += len(ckey)
             continue
@@ -557,6 +678,10 @@ def segment(word, tags=None):
                 # Ohala internal schwa deletion: a live consonant followed by a
                 # liquid/glide that begins a new syllable drops its /a/.
                 medial = _ohala_internal_schwa(cps, i, _ohala_boundary)
+                # Fix 5+ generalized medial-coda rule: any consonant C1
+                # preceding a vowel-bearing C2 becomes a coda and drops /a/.
+                if not medial:
+                    medial = _medial_coda_schwa(cps, i, _ohala_boundary)
             if (is_final and not retain and not is_postposition) or \
                     (i in join_idxs and host_drops.get(i, False)) or medial:
                 pass  # suppress inherent /a/

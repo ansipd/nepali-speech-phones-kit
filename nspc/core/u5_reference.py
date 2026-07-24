@@ -27,6 +27,14 @@ L_NEG = {"मञ्च", "गञ्ज", "पन्त"}
 from .rules import _POSTPOSITIONS as _RULES_POSTPOSITIONS
 _POSTPOSITIONS = set(_RULES_POSTPOSITIONS)
 
+# Fix 2 of linguistic audit (2026-07-24): u5 must consult the same verb-final
+# detector as normalize.auto_tag, so the verb gate is a SINGLE SOURCE of
+# truth. Normally auto_tag pre-computes is_verb_final and stores it on
+# tags["verb"]; this fallback covers bypass callers (direct u5 invocations)
+# that bypass auto_tag.
+from .normalize import ends_in_verb_suffix as _ends_in_verb_suffix
+from .normalize import verb_final_live as _verb_final_live
+
 # Traditional HALANTA words: written without a virama yet pronounced WITHOUT
 # the final inherent /a/ (exception to the C6 RETAIN default). Confirmed by
 # native-speaker review. Add others ONLY with native confirmation.
@@ -118,6 +126,31 @@ def make_tags(orth, *, dead=None, conjunct=False, lneg=False, verb=False,
 # ---------------------------------------------------------------------------
 def u5(orth, tags):
     """Returns (branch_id, retain: bool, trace_note). Pure function of tags."""
+    # Fix 2 — auto-detect verb-final from orthography when caller did not
+    # pre-bake the verb tag (i.e. tags["verb"] is False AND not explicitly
+    # set via the caller's *, verb= kwarg). Single source of truth: the
+    # verb-final detector in normalize.py is read here directly. This means
+    # u5 is now safe to call directly on (orth, {}) without first invoking
+    # auto_tag; the only cost is one extra string scan, no behavior change.
+    verb = tags.get("verb", False)
+    verb_final_live = tags.get("verb_final_live", False)
+    if not verb:
+        is_vf = _ends_in_verb_suffix(orth)
+        is_vf_live = _verb_final_live(orth)
+        if is_vf and not is_vf_live:
+            # Dead-final verb (न्): u5 must classify as C0/DELETE.
+            tags = dict(tags)
+            tags["dead"] = True
+            tags["verb"] = True
+            tags["conjunct"] = False
+            return ("C0", False, "auto-detected dead-final verb -> DELETE (C0)")
+        if is_vf_live:
+            verb = True
+            verb_final_live = True
+            tags = dict(tags)
+            tags["verb"] = True
+            tags["verb_final_live"] = True
+            tags["conjunct"] = False
     if tags.get("dead"):
         return ("C0", False, "final consonant DEAD (virama) -> DELETE")
     # R7 — postposition-final: a word ending in a known postposition (longer

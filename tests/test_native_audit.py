@@ -37,7 +37,7 @@ AUDIT = [
     ("अन्त", ["a", "N", "T", "a"], "C1", "conjunct-final retain"),
     ("स्कन्ध", ["s", "k", "a", "N", "Dh", "a"], "C1", "conjunct-final retain (skandha)"),
     # --- conjunct-final L_neg DELETE (C1-Lneg) ---
-    ("मञ्च", ["m", "a", "n", "ch"], "C1", "manch (final अ dropped, speech variant)"),
+    ("मञ्च", ["m", "a", "N", "c"], "C1-Lneg", "manch (final अ dropped, ञ→N assimilation in cluster)"),
     # --- tatsama RETAIN (C4) / native DELETE (C6) ---
     ("सरकार", ["s", "a", "r", "k", "a:", "r"], "C6", "sarka:r (medial schwa deleted; का=long a:)"),
     ("विकास", ["b", "i", "k", "a:", "s"], "C4", "tatsama retain (bikas; b-shift)"),

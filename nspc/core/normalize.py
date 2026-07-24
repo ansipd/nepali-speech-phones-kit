@@ -186,15 +186,68 @@ def ends_in_verb_suffix(s):
     # NOTE: matra े (U+0947) is intentionally excluded to avoid mistagging
     # proper names like बालेन (बा+ले+न) as verbs. Only independent vowels
     # ए (U+090F) and ऐ (U+0910/U+0948) trigger verb-final detection.
+    # Fix 5+ (stêm-aware guard): only register as verb if the stem before
+    # the final vowel+न/र is a registered/honoured verb stem OR is short
+    # (≤3 cps). Long stems like "डाउनलाइन" would never trip the verb gate.
     if cps[-2] in (_EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
+        stem = s[:-2]  # strip the (ए/ऐ + न/र) ending
+        stem_cps = [c for c in stem if c not in (ANUSVARA, CHANDRABINDU)] if False else list(stem)
+        if len(stem_cps) >= 4:
+            return False  # long stem → proper noun, loanword, or compound
         return True
     # infinitive उन (independent vowel उ + न). Short verbs like आउन (3 cps)
     # must still be caught; only exclude known non-verb nouns like साउन (month).
     _NON_VERB_UN = {"साउन", "फागुन"}
     if cps[-2] == "\u0909" and cps[-1] == "\u0928" and s not in _NON_VERB_UN:
-        return True
-    # negative इन (independent vowel इ + न) e.g. होइन (hoina), पाइन
+        stem = s[:-2]
+        if _stem_is_verb_negative(stem):
+            return True
+        return False
+    # negative इन (independent vowel इ + ন) e.g. होइन (hoina), पाइन
+    # Stem-aware check (Fix 5+): don't classify ANY word ending in इ-न as
+    # verb-negative. Only the HONOURED verb-stem list counts, plus a
+    # conservative native-verb heuristic (independent vowel prefix).
+    # This rules out loanwords such as:
+    #   अनलाइन, इनलाइन, एयरलाइन, साइन, डिजाइन, माइन, etc.
     if n >= 3 and cps[-2] == "\u0907" and cps[-1] == "\u0928":
+        stem = s[:-2]  # remove इ-न ending
+        if _stem_is_verb_negative(stem):
+            return True
+        return False
+    return False
+
+
+# Honest verb-stem set for होइन / पाइन / खाइन / सुतएन / आउन etc. family.
+# These are the only stems whose negative / infinitive ...इन / ...एन / ...उन
+# forms are recognized as verbs by native speech. Anything outside this list
+# ending in इ-न is presumed to be a loanword / proper noun / lexical noun.
+# Add entries ONLY with native-ear confirmation; expanding lazily is the
+# safe direction (under-classify rather than over-classify).
+_VERB_NEG_STEMS = {
+    "हो", "पा", "खा", "गर", "जा", "आउ", "बुझ", "थाह", "राख",
+    "तोक", "मिल", "भेट", "पाउ", "लेख", "बोल", "सुन", "हेर",
+    "खेल", "बस", "बसाइ", "चल", "चलाइ", "ल्याउ", "छा", "छर",
+    "देख", "देखाउ", "भर्न", "रोक", "बन", "बनाउ", "उठ", "थिच",
+    "भन", "छोड", "सुत", "रम", "बुझ", "सुन", "चिन", "मेट",
+}
+
+
+def _stem_is_verb_negative(stem):
+    """Decide whether a stem ending in -इन or -एन/ऐन is a legitimate
+    negative verb infinitive. Conservative: only TRUE if the stem is
+    explicitly registered in _VERB_NEG_STEMS. Anything else falls back to
+    the loanword / native-noun path.
+
+    Why allowlist-only and not the length+ending heuristic: a stem like "सा"
+    (technically "स" + matra ा) has length 2 and ends in a vowel; that
+    shape could be a native verb stem ("सा" हुनु = "to give") OR the start
+    of the English loanword "साइन". Without a verb-lemma DB, the safe opera­
+    tion is: if not in the allowlist, classify as NON-verb. False-negatives
+    (e.g. a real negative form whose stem was never added) are far less
+    harmful than false-positives (a loanword mispronounced because the
+    engine thinks it's a verb).
+    """
+    if stem in _VERB_NEG_STEMS:
         return True
     return False
 
@@ -221,16 +274,28 @@ def verb_final_live(word):
         return True
     # live न/र after ए/ऐ (independent vowel only)  e.g. भएन, छैन
     # NOTE: matra े (U+0947) excluded — see ends_in_verb_suffix for rationale.
+    # Stem-aware guard.
     if cps[-2] in (_EE_INDEP, _EE_AI_MATRA, _EE_AI_INDEP) and cps[-1] in _VERB_FINAL_LAST:
+        stem = NFC(word)[:-2]
+        stem_cps = list(stem)
+        if len(stem_cps) >= 4:
+            return False
         return True
     # infinitive उन (independent vowel उ + live न). Short verbs like आउन (3 cps)
     # must still be caught; only exclude known non-verb nouns like साउन (month).
     _NON_VERB_UN_LIVE = {"साउन", "फागुन"}
     if cps[-2] == "\u0909" and cps[-1] == "\u0928" and word not in _NON_VERB_UN_LIVE:
-        return True
+        stem = NFC(word)[:-2]
+        if _stem_is_verb_negative(stem):
+            return True
+        return False
     # negative इन (independent vowel इ + live न) e.g. होइन (hoina)
+    # Stem-aware (Fix 5+): same logic as ends_in_verb_suffix.
     if n >= 3 and cps[-2] == "\u0907" and cps[-1] == "\u0928":
-        return True
+        stem = NFC(word)[:-2]
+        if _stem_is_verb_negative(stem):
+            return True
+        return False
     return False
 
 

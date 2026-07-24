@@ -1,19 +1,24 @@
-# Python
-__pycache__/
-*.py[cod]
-.pytest_cache/
+# Makefile / build
 .venv/
-venv/
-*.egg-info/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# OS
-Thumbs.db
-ehthumbs.db
-Desktop.ini
+# Audit / debugging scratch (local-only)
+run_g2p.py
+spot_check.py
+scan_issues.py
+trace_anl.py
+trace_sign.py
+verify_fix5.py
+final_spot.py
+audit_reports/
 
-# Editor
+# Editor / OS
 .vscode/
 .idea/
 *.swp
-
-*.zip
+.DS_Store
+Thumbs.db
