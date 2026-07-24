@@ -1,0 +1,42 @@
+# Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+build/
+dist/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Local audit / debugging scratch
+run_g2p.py
+spot_check.py
+scan_issues.py
+trace_anl.py
+trace_sign.py
+verify_fix5.py
+final_spot.py
+audit_scratch/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Archives (do not commit large backups)
+*.zip
+*.tar.gz
+*.rar

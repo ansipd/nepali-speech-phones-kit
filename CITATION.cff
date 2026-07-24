@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+title: "Nepali Speech Phones Kit (NSPC-Kit)"
+message: "If you use this software, please cite the Standard and primary sources below."
+type: software
+authors:
+  - family-names: Ghimire
+    given-names: Sandip
+    email: sandipghimire@nospam.example.com
+repository-code: "https://github.com/ansipd/nepali-speech-phones-kit"
+url: "https://github.com/ansipd/nepali-speech-phones-kit"
+license: MIT
+version: 1.0.0
+date-released: 2026-07-24
+keywords:
+  - nepali
+  - tts
+  - g2p
+  - grapheme-to-phoneme
+  - devanagari
+  - phonemizer
+  - pronunciation
+  - low-resource-languages
+references:
+  - type: standard
+    title: "Nepali Computational Pronunciation Standard v1.0"
+    authors:
+      - family-names: Ghimire
+        given-names: Sandip
+    year: 2026
+    publisher: "NSPC Kit"
+    note: "Authoritative linguistic specification this kit implements."
+  - type: book
+    title: "A Descriptive Grammar of Nepali and an Analyzed Corpus"
+    authors:
+      - family-names: Acharya
+        given-names: Shivraj
+    year: 1991
+  - type: book
+    title: "Nepali Vyakaran ra Varnavigyan"
+    authors:
+      - family-names: Nepal
+        given-names: Dev
+    year: 2011
+    publisher: "Nepal Academy"
+  - type: article
+    title: "Nepali"
+    authors:
+      - family-names: Clements
+        given-names: G. N.
+      - family-names: Khatiwada
+        given-names: R.
+    year: 2009
+    journal: "Journal of the International Phonetic Association"

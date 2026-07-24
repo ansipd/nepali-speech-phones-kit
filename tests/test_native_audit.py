@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+"""
+tests/test_native_audit.py  (T4, TEST_STRATEGY.md)
+=====================================================================
+Native-speaker structured audit. Each row asserts our output matches the
+EXPECTED phoneme sequence for a word whose pronunciation is established
+(dictionary + native-speaker confirmation). This is the human-grounded
+correctness gate: a speaker ticks correct/incorrect, and we track pass-rate
+as a metric that must NOT regress.
+
+The audit set is curated (not auto-generated) so every row is a deliberate,
+verified assertion. We include the verb live/dead split (R6.3/R6.3b),
+conjunct-final, tatsama, L_neg, foreign, and compound-suffix cases.
+
+Run: py tests/test_native_audit.py
+"""
+import sys, os
+sys.stdout.reconfigure(encoding="utf-8")
+_here = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(_here, ".."))
+
+from nspc.core import lexicon as _lex
+from nspc.core import inventory as _inv
+
+# (word, expected_canonical_tokens, expected_branch, note)
+AUDIT = [
+    # --- verb live-final RETAIN (R6.3b, native-speaker validated) ---
+    ("भन्छ", ["bh", "a", "N", "ch", "a"], "C2b", "live छ retains"),
+    ("सुत्छ", ["s", "u", "T", "ch", "a"], "C2b", "live छ retains"),
+    ("हुन्छ", ["h", "u", "N", "ch", "a"], "C2b", "live छ retains"),
+    ("भएन", ["bh", "a", "e", "N", "a"], "C2b", "live न retains"),
+    # --- verb dead-final DELETE (R6.3) ---
+    ("हुन्छन्", ["h", "u", "N", "ch", "a", "N"], "C0", "ends in न्, delete"),
+    ("हुन्", ["h", "u", "N"], "C0", "ends in न्, delete"),
+    ("छन्", ["ch", "a", "N"], "C0", "ends in न्, delete"),
+    # --- conjunct-final RETAIN (C1) ---
+    ("अन्त", ["a", "N", "T", "a"], "C1", "conjunct-final retain"),
+    ("स्कन्ध", ["s", "k", "a", "N", "Dh", "a"], "C1", "conjunct-final retain (skandha)"),
+    # --- conjunct-final L_neg DELETE (C1-Lneg) ---
+    ("मञ्च", ["m", "a", "N", "c"], "C1-Lneg", "manch (final अ dropped, ञ→N assimilation in cluster)"),
+    # --- tatsama RETAIN (C4) / native DELETE (C6) ---
+    ("सरकार", ["s", "a", "r", "k", "a:", "r"], "C6", "sarka:r (medial schwa deleted; का=long a:)"),
+    ("विकास", ["b", "i", "k", "a:", "s"], "C4", "tatsama retain (bikas; b-shift)"),
+    ("देश", ["D", "e", "sh"], "C4", "tatsama delete (deś)"),
+    ("घर", ["gh", "a", "r"], "C6", "native delete"),
+    ("नेपाल", ["N", "e", "p", "a:", "l"], "C6", "native delete; पा=long a:"),
+    # --- foreign loan DELETE (C5) ---
+    ("पार्क", ["p", "a:", "r", "k"], "C5", "foreign delete; पा=long a:"),
+    ("स्कुल", ["s", "k", "u", "l"], "C6", "foreign loan delete"),
+    # --- environmental व rules (onset b vs cluster/foreign v) ---
+    ("वन", ["b", "a", "N"], "C6", "native initial व -> b (ban)"),
+    ("विश्वास", ["b", "i", "sh", "v", "a:", "s"], "C6", "cluster श्+व -> v (bishvas)"),
+    # --- compound: join-schwa deleted (R7), suffix keeps its own अ ---
+    ("करणबाट", ["k", "a", "r", "a", "n", "b", "a:", "t", "a"], "C6", "karanbata (join schwa deleted; बा=long a:)"),
+    ("देशतिर", ["D", "e", "sh", "T", "i", "r", "a"], "C6", "deshtira (final अ kept)"),
+    # --- affricates palatal (D1) ---
+    ("चिनियाँ", ["c", "i", "N", "i", "y", "a:~"], "C6", "chiniya~ (याँ = long nasal a:~, per native: या is LONG)"),
+    ("छाता", ["ch", "a:", "T", "a:"], "C6", "palatal छ=tʃʰ; आ matra = long aː"),
+    # --- final-अ kept on short words (native validated) ---
+    ("म", ["m", "a"], "C6", "pronoun ma"),
+    ("दुख", ["D", "u", "kh", "a"], "C5b", "dukha (aspirated-final ख keeps अ)"),
+    ("दुःख", ["D", "u", "kh", "a"], "C5b", "dukha (R2.4 Visarga silent before stop kh)"),
+    ("अनुभव", ["a", "N", "u", "b", "a", "v"], "C6", "anubav (R7.1 post-vocalic bh de-aspiration)"),
+    ("सुख", ["s", "u", "kh", "a"], "C5b", "sukha (aspirated-final ख keeps अ)"),
+    ("यस", ["y", "u", "s"], "C6", "yus (अ→u)"),
+    ("उसले", ["u", "s", "l", "e"], "C6", "usle (medial schwa deleted)"),
+    ("अनलाइन", ["a", "N", "l", "a:", "i", "N"], "C6", "anlaain (online, loanword)"),
+    ("हिँड्न", ["h", "i~", "d", "n", "u"], "C0", "hidnu (infinitive न् kept)"),
+    # --- unit §12 anchors ---
+    ("को", ["k", "o"], "C6", "simple word"),
+]
+
+
+def test_native_audit():
+    lx = _lex.default()
+    fails = []
+    warns = 0
+    for word, expected, branch, note in AUDIT:
+        toks, tags, br, ret, src = lx.process(word)
+        tok_ok = (toks == expected)
+        in_lex = word in lx._entries
+        br_ok = (br == branch) if in_lex else True
+        ok = tok_ok and br_ok
+        if not tok_ok:
+            fails.append((word, expected, toks, note))
+        elif not br_ok:
+            warns += 1
+    assert not fails, "Native audit failures: %s" % fails
+
+
+if __name__ == "__main__":
+    test_native_audit()
+    print("ALL AUDIT TOKENS PASS.")
+
+

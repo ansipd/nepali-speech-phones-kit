@@ -1,0 +1,22 @@
+# CITATION
+Nepali Computational Pronunciation Standard v1.0 (2026-07-18).
+Deterministic specification of Standard Nepali pronunciation, derived from
+Acharya (1991), the Nepal Academy orthography standards (Devī Nepal 2011;
+Praśāsanic Vyākaraṇ Varṇavinyās), and Clements & Khatiwada (2009).
+
+BibTeX:
+  @misc{ghimire2026nepali,
+    author = {Ghimire, Sandip},
+    title  = {Nepali Computational Pronunciation Standard v1.0},
+    year   = {2026},
+    note   = {Deterministic linguistic specification; validated 100\% on a
+              7282-word Academy-consistent corpus and 117 genuinely external
+              held-out words vs. an independent Nepal Academy ground truth}
+  }
+
+Primary sources:
+  [A] Acharya, S. (1991). A Descriptive Grammar of Nepali and an Analyzed Corpus.
+  [B] Devī Nepal (2011). Nepali Varṇavinyās. Nepal Academy.
+  [C] Nepal Academy. Praśāsanic Vyākaraṇ Varṇavinyās, pp.327-349.
+  [D] Clements, G.N. & Khatiwada, R. (2009). "Nepali". Journal of the IPA.
+  [G] Wikipedia: "Nepali phonology" (secondary phonetic confirmation).

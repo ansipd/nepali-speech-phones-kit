@@ -1,0 +1,48 @@
+[project]
+name = "nepali-speech-phones-kit"
+version = "1.0.0"
+description = "Universal open-source G2P frontend for Standard Nepali: Devanagari (with Latin code-switch) text to canonical phoneme inventory for TTS training. Rule-based, no trained voice. Drops eSpeak's defective Nepali 'ne'."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Sandip Ghimire", email = "sandipghimire@nospam.example.com" }]
+keywords = [
+    "nepali",
+    "nepali-tts",
+    "g2p",
+    "grapheme-to-phoneme",
+    "text-to-speech",
+    "tts",
+    "phonemizer",
+    "devanagari",
+    "pronunciation",
+    "nlp",
+    "low-resource-languages",
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: Linguistic",
+    "Natural Language :: Nepali",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.optional-dependencies]
+trainers = ["openpyxl", "indicxlit"]
+dev = ["pytest"]
+
+[project.scripts]
+nspc = "nspc.cli:main"
+
+[project.urls]
+"Hompage" = "https://github.com/ansipd/nepali-speech-phones-kit"
+"Issues" = "https://github.com/ansipd/nepali-speech-phones-kit/issues"
+"Citation" = "https://github.com/ansipd/nepali-speech-phones-kit/blob/main/CITATION.cff"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
