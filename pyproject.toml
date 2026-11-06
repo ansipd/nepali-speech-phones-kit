@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "nepali-speech-phones-kit"
 version = "1.0.0"
@@ -20,7 +24,6 @@ keywords = [
     "low-resource-languages",
 ]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -29,7 +32,7 @@ classifiers = [
     "Natural Language :: Nepali",
     "Operating System :: OS Independent",
 ]
-dependencies = []
+dependencies = ["openpyxl"]
 
 [project.optional-dependencies]
 trainers = ["openpyxl", "indicxlit"]
@@ -46,3 +49,6 @@ nspc = "nspc.cli:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+include = ["nspc*"]

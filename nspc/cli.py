@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-nspc/cli.py — command line frontend for the NSPC-Kit.
+nspc/cli.py: command line frontend for the NSPC-Kit.
 
 Examples
 --------
@@ -33,6 +33,9 @@ from .core.adapters import kokoro as _kokoro
 def _process_text(text, fmt):
     lx = _lex.default()
     results = []
+    # Expand numerals and transliterate Roman words to Devanagari before
+    # word-level G2P, so the CLI matches the documented pipeline.
+    text = _nt.normalize_text_pipeline(text)
     for tok in _nt.tokenize(text):
         surface = tok["surface"]
         kind = tok["kind"]
@@ -115,6 +118,9 @@ def main(argv=None):
     elif args.format == "matcha":
         for r in results:
             print(r["text"], "->", _matcha.convert(r["tokens"]))
+    elif args.format == "kokoro":
+        for r in results:
+            print(r["text"], "->", _kokoro.convert(r["tokens"]))
     return 0
 
 
